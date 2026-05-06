@@ -273,8 +273,8 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 0.95rem;
-            font-family: 'Times New Roman', Times, serif;
+            font-size: 1rem;
+            font-family: Calibri, 'Segoe UI', Arial, sans-serif;
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid var(--border-color);
@@ -930,7 +930,7 @@
                     <td class="col-ton">${formatNumber(ton.vol)}</td><td class="col-ton">${formatPercent(ton.gan)}</td><td class="col-ton">${formatPercent(ton.gtc)}</td>
                     <td class="col-tong font-bold">${formatNumber(tot.vol)}</td>
                     <td class="col-tong font-bold">${formatPercent(tot.gan)}</td>
-                    <td class="${finalGtcClass}" style="${finalGtcColor} font-size: 1.1rem;">${formatPercent(tot.gtc)}</td>
+                    <td class="${finalGtcClass}" style="${finalGtcColor}">${formatPercent(tot.gtc)}</td>
                 `;
                 tbody.appendChild(tr);
             }
