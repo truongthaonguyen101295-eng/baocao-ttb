@@ -33,17 +33,7 @@
             position: relative;
         }
         
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-image: url('illustration2.png?v=2');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.05;
-            z-index: -1;
-            pointer-events: none;
-        }
+
 
         /* Top Navigation */
         .top-nav {
@@ -148,6 +138,16 @@
             opacity: 1;
             mask-image: linear-gradient(to right, transparent, black 30%);
             -webkit-mask-image: linear-gradient(to left, black 50%, transparent);
+        }
+        
+        .banner-img-left {
+            position: absolute;
+            left: 0; top: -40px;
+            height: 280px;
+            object-fit: contain;
+            z-index: 1;
+            opacity: 0.3;
+            -webkit-mask-image: linear-gradient(to right, black 50%, transparent);
         }
 
         /* Main Container */
@@ -426,6 +426,7 @@
 
     <!-- Banner -->
     <div class="banner">
+        <img src="illustration2.png?v=2" alt="Background" class="banner-img-left" onerror="this.style.display='none'">
         <div class="banner-content">
             <h1 id="banner-title">Báo Cáo Vận Hành - Trung Trung Bộ</h1>
             <p id="date-display">Dữ liệu thực tế ngày: ...</p>
