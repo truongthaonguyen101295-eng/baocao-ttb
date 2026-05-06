@@ -678,8 +678,8 @@
                                     hType = row.findIndex(c => normStr(c) === "loại hàng" || normStr(c) === "ca");
                                     hTime = row.findIndex(c => normStr(c) === "time");
                                     hVol = row.findIndex(c => normStr(c) === "volume");
-                                    hGan = row.findIndex(c => normStr(c) === "% gán");
-                                    hGTC = row.findIndex(c => normStr(c) === "% gtc" || normStr(c) === "% ltc");
+                                    hGan = row.findIndex(c => normStr(c).replace(/\s/g, '') === "%gán");
+                                    hGTC = row.findIndex(c => { let s = normStr(c).replace(/\s/g, ''); return s === "%gtc" || s === "%ltc"; });
                                     return; 
                                 }
 
