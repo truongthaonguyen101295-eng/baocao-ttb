@@ -114,11 +114,11 @@
             margin-right: 350px;
         }
 
-        .banner-actions button {
-            border: none; padding: 0.7rem 1.2rem; border-radius: 6px;
-            font-size: 0.95rem; font-weight: 600; cursor: pointer;
+        .banner-actions button, .nav-actions button {
+            border: none; padding: 0.6rem 1rem; border-radius: 6px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; gap: 0.5rem; color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .btn-blue { background-color: #3498db; }
@@ -404,6 +404,11 @@
             <li id="nav-ltc-tts" onclick="switchTab('ltc-tts')"><i class="fa-solid fa-boxes-packing"></i> Báo Cáo LTC TTS</li>
             <li id="nav-org" onclick="switchTab('org')" style="display: none;"><i class="fa-solid fa-sitemap"></i> Cơ Cấu Tổ Chức</li>
         </ul>
+        <div class="nav-actions" style="margin-left: auto; display: flex; gap: 0.8rem; align-items: center;">
+            <button class="btn-blue" onclick="exportTelegram()"><i class="fa-brands fa-telegram"></i> Gửi Báo Cáo</button>
+            <input type="file" id="raw-data-upload" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
+            <button class="btn-green" onclick="document.getElementById('raw-data-upload').click()"><i class="fa-solid fa-file-csv"></i> Tải lên Dữ liệu Thô</button>
+        </div>
     </nav>
 
     <!-- Banner -->
@@ -416,9 +421,6 @@
             <select id="date-filter" class="date-filter-select" onchange="handleDateChange(this.value)" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; outline: none; cursor: pointer; color: var(--text-gray);">
                 <option value="">-- Chọn ngày báo cáo --</option>
             </select>
-            <button class="btn-blue" onclick="exportTelegram()"><i class="fa-brands fa-telegram"></i> Gửi Báo Cáo</button>
-            <input type="file" id="raw-data-upload" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
-            <button class="btn-green" onclick="document.getElementById('raw-data-upload').click()"><i class="fa-solid fa-file-csv"></i> Tải lên Dữ liệu Thô</button>
         </div>
         <img src="illustration1.png?v=2" alt="Delivery" class="banner-img" onerror="this.style.display='none'">
     </div>
