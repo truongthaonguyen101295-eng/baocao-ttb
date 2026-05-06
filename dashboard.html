@@ -429,16 +429,17 @@
             <h1 id="banner-title">Báo Cáo Vận Hành - Trung Trung Bộ</h1>
             <p id="date-display">Dữ liệu thực tế ngày: ...</p>
         </div>
-        <div class="banner-actions">
-            <select id="date-filter" class="date-filter-select" onchange="handleDateChange(this.value)" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; outline: none; cursor: pointer; color: var(--text-gray);">
-                <option value="">-- Chọn ngày báo cáo --</option>
-            </select>
-        </div>
         <img src="illustration1.png?v=2" alt="Delivery" class="banner-img" onerror="this.style.display='none'">
     </div>
 
     <div class="container">
         
+        <div style="position: absolute; top: 1.2rem; right: 2.5rem; z-index: 20;">
+            <select id="date-filter" class="date-filter-select" onchange="handleDateChange(this.value)" style="padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 600; outline: none; cursor: pointer; color: var(--text-dark); background-color: #f8fafc; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s;">
+                <option value="">-- Chọn ngày báo cáo --</option>
+            </select>
+        </div>
+
         <!-- ================= GTC VIEW ================= -->
         <div id="view-gtc" class="view-container active">
             <div class="gtc-container">
