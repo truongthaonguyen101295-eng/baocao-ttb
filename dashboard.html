@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Vận Hành - Vùng TTB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        :root {
+            --ghn-orange: #f37021;
+            --ghn-orange-light: #fff3ed;
+            --ghn-blue: #1e3a8a;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --bg-gray: #f5f6f8;
+            --border-color: #eaedf1;
+            --white: #ffffff;
+            --red: #e74c3c;
+            --green: #27ae60;
+            --red-bg: #fdedec;
+            --green-bg: #eafaf1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.5;
+            position: relative;
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url('illustration2.png?v=2');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.05;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background-color: var(--white);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            height: 60px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { margin-right: 2rem; display: flex; align-items: center; gap: 10px; }
+        .logo-title { color: var(--ghn-orange); font-weight: 800; font-size: 1.25rem; margin-bottom: 2px;}
+        .logo-sub { font-size: 0.75rem; color: var(--ghn-blue); font-weight: 600;}
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        .nav-links li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            padding: 0 1rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-links li:hover { color: var(--ghn-orange); }
+        .nav-links li.active {
+            color: var(--ghn-orange);
+            border-bottom-color: var(--ghn-orange);
+            background-color: var(--ghn-orange-light);
+        }
+
+        /* Banner Hero */
+        .banner {
+            background: linear-gradient(135deg, #f15a24 0%, #f37021 50%, #fbad18 100%);
+            height: 180px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 0 3rem;
+            color: white;
+        }
+
+        .banner-content { z-index: 2; }
+        .banner h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .banner p { font-size: 0.95rem; opacity: 0.9; }
+
+        .banner-actions {
+            z-index: 2;
+            margin-left: auto;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-right: 350px;
+        }
+
+        .banner-actions button {
+            border: none; padding: 0.7rem 1.2rem; border-radius: 6px;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 0.5rem; color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-blue { background-color: #3498db; }
+        .btn-blue:hover { background-color: #2980b9; }
+        .btn-green { background-color: #2ecc71; }
+        .btn-green:hover { background-color: #27ae60; }
+
+        .banner-img {
+            position: absolute;
+            right: 0; top: -40px;
+            height: 280px;
+            object-fit: contain;
+            z-index: 1;
+            mix-blend-mode: luminosity;
+            opacity: 0.8;
+            mask-image: linear-gradient(to right, transparent, black 30%);
+            -webkit-mask-image: linear-gradient(to left, black 50%, transparent);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1500px;
+            margin: -30px auto 2rem auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* View Container */
+        .view-container { display: none; }
+        .view-container.active { display: block; }
+
+        /* KPI Grid (ODR) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .kpi-title { font-size: 0.9rem; color: var(--text-gray); font-weight: 500; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text-dark); display: flex; align-items: baseline; gap: 0.5rem; }
+        .kpi-sub { font-size: 1rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; }
+        .trend-up { background-color: var(--green-bg); color: var(--green); }
+        .trend-down { background-color: var(--red-bg); color: var(--red); }
+
+        /* Region Grid (ODR) */
+        .region-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .region-card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .region-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--ghn-blue); }
+        .region-card .stats { text-align: right; }
+        .region-card .odr { font-size: 1.5rem; font-weight: 700; color: var(--ghn-orange); }
+        .region-card .compare { font-size: 0.8rem; font-weight: 600; }
+
+        /* Warning Section (ODR) */
+        .warning-section {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid #fadbd8;
+        }
+
+        .warning-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: var(--red-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--red);
+        }
+
+        .warning-icon { color: var(--red); font-size: 1.5rem; margin-top: 2px; }
+        .warning-title h3 { color: var(--red); font-size: 1.1rem; font-weight: 700; margin-bottom: 0.2rem; text-transform: uppercase; }
+        .warning-title p { font-size: 0.9rem; color: #c0392b; }
+
+        .warning-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+        .warning-table th { text-align: left; padding: 1rem; color: var(--red); font-weight: 700; font-size: 0.8rem; border-bottom: 2px solid #fadbd8; }
+        .warning-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); font-weight: 500; }
+        .badge-red { background-color: var(--red); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.85rem; }
+
+        /* Modern GTC Table Design */
+        .gtc-container {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .gtc-title-row {
+            text-align: left;
+            color: var(--ghn-blue);
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .gtc-title-row span {
+            color: var(--ghn-orange);
+            background: var(--ghn-orange-light);
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 1rem;
+        }
+
+        .gtc-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .gtc-table th, .gtc-table td {
+            padding: 0.8rem 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .gtc-table th:last-child, .gtc-table td:last-child {
+            border-right: none;
+        }
+
+        .gtc-table th { 
+            font-weight: 700; 
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .gtc-table tbody tr:hover { background-color: #f8fafc; }
+
+        .gtc-table td:first-child { 
+            text-align: left; 
+            font-weight: 600; 
+            color: var(--ghn-blue);
+            background-color: #fff;
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+        }
+
+        .gtc-table th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            background-color: #f8fafc;
+        }
+
+        /* Subtle Colors */
+        .bg-header-main { background-color: #f8fafc; color: var(--text-gray); }
+        .bg-ca1 { background-color: #f0f9ff; color: #0284c7; border-top: 3px solid #0284c7 !important; }
+        .bg-ca2 { background-color: #f8fafc; color: #475569; border-top: 3px solid #475569 !important; }
+        .bg-ton { background-color: #faf5ff; color: #9333ea; border-top: 3px solid #9333ea !important; }
+        .bg-tong { background-color: #fff7ed; color: #ea580c; border-top: 3px solid #ea580c !important; }
+        
+        .sub-header { background-color: #fcfcfc; color: var(--text-gray); }
+        .sub-tong { background-color: #fffaf5; color: #ea580c; font-weight: 800 !important; }
+        
+        .col-ca1 { background-color: #e0f2fe; }
+        .col-ca2 { background-color: #f1f5f9; }
+        .col-ton { background-color: #f3e8ff; }
+        .col-tong { background-color: #ffedd5; }
+        .font-bold { font-weight: bold; }
+        .total-row td { background-color: #f8fafc; font-weight: 800; border-top: 2px solid #cbd5e1; }
+        .total-row td:first-child { background-color: #f8fafc; }
+
+        /* Org Master-Detail View */
+        .org-container { background: var(--white); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .org-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.8rem; position: relative; z-index: 2; }
+        .org-title { color: var(--ghn-blue); font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; }
+        
+        .org-layout { display: flex; gap: 1.5rem; min-height: 600px; align-items: flex-start; position: relative; z-index: 2; }
+        
+        /* Sidebar */
+        .org-sidebar { width: 280px; flex-shrink: 0; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border-color); padding: 1rem; }
+        .org-sidebar-title { font-weight: 700; color: var(--text-gray); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem; padding-left: 0.5rem; }
+        .prov-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+        .prov-item { padding: 0.8rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--text-dark); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; }
+        .prov-item:hover { background: #f1f5f9; border-color: #e2e8f0; }
+        .prov-item.active { background: var(--ghn-orange-light); color: var(--ghn-orange); border-color: #fed7aa; }
+        .prov-count { background: var(--white); font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 12px; color: var(--text-gray); border: 1px solid var(--border-color); }
+        .prov-item.active .prov-count { background: var(--ghn-orange); color: white; border-color: var(--ghn-orange); }
+
+        /* Main Content */
+        .org-main { flex-grow: 1; min-width: 0; }
+        .org-filters { display: flex; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border-color); align-items: center; }
+        .org-filters select, .org-filters input { padding: 0.6rem 1rem; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.2s; flex-grow: 1; }
+        .org-filters select:focus, .org-filters input:focus { border-color: var(--ghn-orange); }
+        .org-filters i { color: var(--text-gray); }
+
+        /* Grid Cards */
+        .wh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.2rem; }
+        .wh-card { background: var(--white); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; }
+        .wh-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); border-color: #cbd5e1; }
+        
+        .wh-header { padding: 1rem; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.3rem; }
+        .wh-title { font-weight: 700; font-size: 1.05rem; color: var(--ghn-blue); display: flex; align-items: flex-start; gap: 0.5rem; line-height: 1.3; }
+        .wh-id { font-size: 0.8rem; color: var(--text-gray); background: #f1f5f9; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 600; white-space: nowrap; margin-top: 2px;}
+        .wh-dist { font-size: 0.85rem; color: var(--text-gray); display: flex; align-items: center; gap: 0.4rem; margin-top: 0.2rem; }
+        
+        .wh-body { padding: 1rem; background: #fafafa; }
+        .wh-staff { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .staff-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; }
+        .staff-label { color: var(--text-gray); font-weight: 500; }
+        .staff-val { font-weight: 700; color: var(--text-dark); background: #e0e7ff; color: #4338ca; padding: 0.2rem 0.6rem; border-radius: 20px; }
+        .staff-val.hrbp { background: #fce7f3; color: #be185d; }
+
+        /* Wards Accordion */
+        .ward-toggle { width: 100%; text-align: left; background: var(--white); border: 1px solid var(--border-color); padding: 0.6rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-dark); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .ward-toggle:hover { background: #f8fafc; }
+        .ward-content { display: none; padding: 1rem; background: var(--white); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 6px 6px; font-size: 0.85rem; color: var(--text-gray); line-height: 1.6; max-height: 200px; overflow-y: auto; }
+        .wh-card.expanded .ward-content { display: block; }
+        .wh-card.expanded .ward-toggle { border-radius: 6px 6px 0 0; background: #f8fafc; }
+        .wh-card.expanded .ward-toggle i { transform: rotate(180deg); }
+        .ward-pill { display: inline-block; background: #f1f5f9; padding: 0.2rem 0.6rem; border-radius: 4px; margin: 0.2rem; border: 1px solid #e2e8f0; }
+
+        #loading-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(255,255,255,0.9);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1000; font-size: 1.2rem; color: var(--ghn-orange); font-weight: 600;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+        <span id="loading-text">Đang khởi tạo hệ thống...</span>
+    </div>
+
+    <!-- Top Nav -->
+    <nav class="top-nav">
+        <div class="logo">
+           <img src="logo.png?v=1" alt="GHN Logo" style="height: 55px; border-radius: 6px;">
+           <div>
+               <div class="logo-title">GiaoHàngNhanh</div>
+               <div class="logo-sub">VÙNG TRUNG TRUNG BỘ (TTB)</div>
+           </div>
+        </div>
+        <ul class="nav-links">
+            <li id="nav-gtc" class="active" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> Báo Cáo GTC Tổng</li>
+            <li id="nav-tts" onclick="switchTab('tts')"><i class="fa-solid fa-chart-pie"></i> Báo Cáo GTC TTS</li>
+            <li id="nav-org" onclick="switchTab('org')" style="display: none;"><i class="fa-solid fa-sitemap"></i> Cơ Cấu Tổ Chức</li>
+        </ul>
+    </nav>
+
+    <!-- Banner -->
+    <div class="banner">
+        <div class="banner-content">
+            <h1 id="banner-title">Báo Cáo Vận Hành - Trung Trung Bộ</h1>
+            <p id="date-display">Dữ liệu thực tế ngày: ...</p>
+        </div>
+        <div class="banner-actions">
+            <select id="date-filter" class="date-filter-select" onchange="handleDateChange(this.value)" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; outline: none; cursor: pointer; color: var(--text-gray);">
+                <option value="">-- Chọn ngày báo cáo --</option>
+            </select>
+            <button class="btn-blue" onclick="exportTelegram()"><i class="fa-brands fa-telegram"></i> Gửi Báo Cáo</button>
+            <input type="file" id="raw-data-upload" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
+            <button class="btn-green" onclick="document.getElementById('raw-data-upload').click()"><i class="fa-solid fa-file-csv"></i> Tải lên Dữ liệu Thô</button>
+        </div>
+        <img src="illustration1.png?v=2" alt="Delivery" class="banner-img" onerror="this.style.display='none'">
+    </div>
+
+    <div class="container">
+        
+        <!-- ================= GTC VIEW ================= -->
+        <div id="view-gtc" class="view-container active">
+            <div class="gtc-container">
+                <div class="gtc-title-row">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-chart-line" style="color: var(--ghn-blue)"></i> <span id="gtc-table-title">BÁO CÁO KẾT QUẢ GIAO THÀNH CÔNG TỔNG</span> NGÀY <span id="gtc-date">...</span>
+                    </div>
+                    <button class="btn-green" onclick="exportGTCToSheet()" style="margin-left: auto; font-size: 0.85rem; padding: 0.5rem 1rem;">
+                        <i class="fa-solid fa-copy"></i> Copy Data cho Google Sheet
+                    </button>
+                </div>
+                <table class="gtc-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="bg-header-main" style="width: 15%">Cấp Quản Lý / AM</th>
+                            <th colspan="3" class="bg-ca1">Hàng mới ca 1</th>
+                            <th colspan="3" class="bg-ca2">Hàng mới ca 2</th>
+                            <th colspan="3" class="bg-ton">Hàng tồn</th>
+                            <th colspan="3" class="bg-tong">Tổng Ngày <span class="gtc-date-header">...</span></th>
+                        </tr>
+                        <tr>
+                            <!-- Ca 1 -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                            <!-- Ca 2 -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                            <!-- Ton -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                            <!-- Tong -->
+                            <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong">% GTC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gtc-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ================= ORG VIEW ================= -->
+        <div id="view-org" class="view-container">
+            <div class="org-container">
+                <div class="org-header">
+                    <div class="org-title"><i class="fa-solid fa-sitemap" style="color: var(--ghn-orange)"></i> Cơ Cấu Mạng Lưới Bưu Cục</div>
+                </div>
+                
+                <div class="org-layout">
+                    <!-- Sidebar -->
+                    <div class="org-sidebar">
+                        <div class="org-sidebar-title">Khu vực quản lý (7 Tỉnh)</div>
+                        <ul class="prov-list" id="org-prov-list">
+                            <!-- Rendered by JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="org-main">
+                        <div class="org-filters">
+                            <i class="fa-solid fa-filter"></i>
+                            <select id="filter-am" onchange="renderOrgView()">
+                                <option value="ALL">-- Tất cả AM --</option>
+                            </select>
+                            <div style="flex-grow: 2; position: relative;">
+                                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                                <input type="text" id="search-org" placeholder="Tìm tên bưu cục, phường xã..." onkeyup="renderOrgView()" style="width: 100%; padding-left: 2.5rem;">
+                            </div>
+                        </div>
+                        
+                        <div class="wh-grid" id="org-wh-grid">
+                            <!-- Rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Data ---
+        const GTC_TOTAL_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=85996441";
+        const GTC_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=0";
+        const ORG_CSV_URL = "https://docs.google.com/spreadsheets/d/1ZXKLrjCQ3u9khiRmzzxQO9eSBS9RZAfdx777hmyKBqQ/export?format=csv&gid=0";
+
+        let globalData = {
+            gtc: { dates: [], dataByDate: {}, loaded: false },
+            tts: { dates: [], dataByDate: {}, loaded: false },
+            org: { loaded: false, dataMap: {}, ams: [], provinces: [] },
+            activeDate: "",
+            activeTab: "gtc"
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+        });
+
+        // --- Navigation ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-links li').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + tabId).classList.add('active');
+            
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+
+            globalData.activeTab = tabId;
+
+            if (tabId === 'org') {
+                document.getElementById('view-org').classList.add('active');
+                document.getElementById('banner-title').innerText = "Sơ Đồ Tổ Chức Mạng Lưới - Trung Trung Bộ";
+                document.getElementById('date-display').innerText = "Dữ liệu cơ cấu nhân sự hiện tại";
+                document.getElementById('date-filter').style.display = 'none';
+            } else if (tabId === 'gtc' || tabId === 'tts') {
+                document.getElementById('view-gtc').classList.add('active'); // Dùng chung view cho 2 tab
+                document.getElementById('date-filter').style.display = 'inline-block';
+                
+                if (tabId === 'gtc') {
+                    document.getElementById('banner-title').innerText = "Báo Cáo Vận Hành - GTC Tổng";
+                    document.getElementById('gtc-table-title').innerText = "BÁO CÁO KẾT QUẢ GIAO THÀNH CÔNG TỔNG";
+                } else {
+                    document.getElementById('banner-title').innerText = "Báo Cáo Vận Hành - GTC TTS";
+                    document.getElementById('gtc-table-title').innerText = "BÁO CÁO KẾT QUẢ GIAO THÀNH CÔNG TTS";
+                }
+                
+                renderCurrentGTCData();
+            }
+        }
+
+        // --- Loaders ---
+        function parseCSVRow(text) {
+            let ret = [], inQuote = false, value = '';
+            for (let ch of text) {
+                if (inQuote) {
+                    if (ch === '"') inQuote = false;
+                    else value += ch;
+                } else {
+                    if (ch === '"') inQuote = true;
+                    else if (ch === ',') { ret.push(value.trim()); value = ''; }
+                    else value += ch;
+                }
+            }
+            ret.push(value.trim());
+            return ret;
+        }
+
+        function normalizeBranchName(name) {
+            if(!name) return "";
+            name = name.toLowerCase().trim();
+            name = name.replace(/^bc /, 'bưu cục ');
+            name = name.replace(/\s+/g, ' ');
+            return name;
+        }
+
+        function formatPercent(val) {
+            if(!val || isNaN(val)) return "0.00%";
+            return (parseFloat(val) * 100).toFixed(2) + "%";
+        }
+
+        function formatNumber(val) {
+            if(!val || isNaN(val)) return "0";
+            return parseInt(val).toLocaleString('en-US');
+        }
+
+        function parsePapa(url) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) { resolve(results.data); },
+                    error: function(err) { reject(err); }
+                });
+            });
+        }
+
+                function fetchAndParseStackedSheet(url) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, {
+                    download: true,
+                    header: false,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        try {
+                            const rawRows = results.data;
+                            
+                            const normStr = s => s ? s.normalize('NFC').replace(/^﻿/, '').trim().toLowerCase() : "";
+
+                            // Convert horizontal tables to vertical tables
+                            let tableStartsSet = new Set();
+                            rawRows.forEach(row => {
+                                row.forEach((cell, idx) => {
+                                    if (normStr(cell) === "cấp quản lý") {
+                                        tableStartsSet.add(idx);
+                                    }
+                                });
+                            });
+                            
+                            let tableStarts = Array.from(tableStartsSet).sort((a,b) => a - b);
+                            if (tableStarts.length === 0) tableStarts = [0];
+
+                            let tables = [];
+                            for (let i = 0; i < tableStarts.length; i++) {
+                                tables.push([]);
+                            }
+
+                            rawRows.forEach(row => {
+                                for (let i = 0; i < tableStarts.length; i++) {
+                                    let start = tableStarts[i];
+                                    let end = (i + 1 < tableStarts.length) ? tableStarts[i+1] : row.length;
+                                    let subRow = row.slice(start, end);
+                                    if (subRow.some(c => c && c.trim() !== "")) {
+                                        tables[i].push(subRow);
+                                    }
+                                }
+                            });
+
+                            let verticalRows = [];
+                            tables.forEach(tableRows => {
+                                verticalRows = verticalRows.concat(tableRows);
+                            });
+
+                            let dataByDate = {};
+                            let currentSection = ""; 
+                            let hType = -1, hTime = -1, hVol = -1, hGan = -1, hGTC = -1, hAm = -1;
+
+                            verticalRows.forEach(row => {
+                                let rowStr = normStr(row.join(" "));
+                                
+                                // Check for header row
+                                if (rowStr.includes("cấp quản lý") && rowStr.includes("chi tiết")) {
+                                    if (rowStr.includes("loại hàng")) {
+                                        currentSection = "BREAKDOWN";
+                                    } else {
+                                        currentSection = "TOTAL";
+                                    }
+                                    
+                                    hAm = row.findIndex(c => normStr(c) === "chi tiết");
+                                    hType = row.findIndex(c => normStr(c) === "loại hàng");
+                                    hTime = row.findIndex(c => normStr(c) === "time");
+                                    hVol = row.findIndex(c => normStr(c) === "volume");
+                                    hGan = row.findIndex(c => normStr(c) === "% gán");
+                                    hGTC = row.findIndex(c => normStr(c) === "% gtc");
+                                    return; 
+                                }
+
+                                if (!currentSection || hTime === -1 || hAm === -1) return;
+
+                                let am = row[hAm];
+                                let dateStr = row[hTime];
+                                if (!am || !dateStr || dateStr.trim() === "") return;
+                                
+                                let amLower = normStr(am);
+                                am = row[hAm].replace(/^﻿/, '').trim();
+                                dateStr = row[hTime].replace(/^﻿/, '').trim();
+                                
+                                if (!dataByDate[dateStr]) {
+                                    dataByDate[dateStr] = { amMap: {}, minGTC: 1, maxGTC: 0, grandTotal: null, date: dateStr };
+                                }
+                                
+                                let d = dataByDate[dateStr];
+                                if (!d.amMap[am]) d.amMap[am] = { name: am, ca1: {}, ca2: {}, ton: {}, total: {} };
+                                
+                                let rawVol = (row[hVol] || "0").toString().replace(/,/g, '');
+                                let vol = parseInt(rawVol) || 0;
+                                
+                                let parsePercentage = (valStr) => {
+                                    valStr = (valStr || "0").toString().trim();
+                                    if (valStr.includes('%')) {
+                                        return parseFloat(valStr.replace(/%/g, '')) / 100;
+                                    }
+                                    return parseFloat(valStr) || 0;
+                                };
+
+                                let gan = parsePercentage(row[hGan]);
+                                let gtc = parsePercentage(row[hGTC]);
+
+                                if (currentSection === "BREAKDOWN" && hType !== -1) {
+                                    let type = normStr(row[hType]);
+                                    
+                                    let targetObj = d.amMap[am];
+                                    if (amLower === "grand total") {
+                                        if (!d.grandTotal) d.grandTotal = { name: "Grand Total", ca1:{}, ca2:{}, ton:{}, total:{} };
+                                        targetObj = d.grandTotal;
+                                    }
+
+                                    if(type === 'hàng mới ca 1') targetObj.ca1 = {vol, gan, gtc};
+                                    if(type === 'hàng mới ca 2') targetObj.ca2 = {vol, gan, gtc};
+                                    if(type === 'hàng tồn') targetObj.ton = {vol, gan, gtc};
+                                } else if (currentSection === "TOTAL") {
+                                    if(amLower === "grand total") {
+                                        if (!d.grandTotal) d.grandTotal = { name: "Grand Total", ca1:{}, ca2:{}, ton:{}, total:{} };
+                                        d.grandTotal.total = {vol, gan, gtc};
+                                    } else {
+                                        d.amMap[am].total = {vol, gan, gtc};
+                                        if(gtc < d.minGTC) d.minGTC = gtc;
+                                        if(gtc > d.maxGTC) d.maxGTC = gtc;
+                                    }
+                                }
+                            });
+
+                            let dates = Object.keys(dataByDate).sort().reverse(); 
+                            for (let date in dataByDate) {
+                                let d = dataByDate[date];
+                                let ams = Object.values(d.amMap).filter(a => normStr(a.name) !== "grand total" && a.total && a.total.vol !== undefined);
+                                ams.sort((a, b) => {
+                                    let gtcA = a.total ? a.total.gtc : 0;
+                                    let gtcB = b.total ? b.total.gtc : 0;
+                                    return gtcA - gtcB;
+                                });
+                                d.ams = ams;
+                            }
+                            
+                            resolve({ dates, dataByDate, rawCount: rawRows.length });
+                        } catch (e) {
+                            reject(e);
+                        }
+                    },
+                    error: function(err) { reject(err); }
+                });
+            });
+        }
+        async function loadAllData() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            try {
+                document.getElementById('banner-title').innerText = "Báo Cáo Vận Hành - GTC Tổng";
+                
+                await Promise.all([
+                    loadGTCData()
+                ]);
+            } catch(e) {
+                console.error(e);
+                alert("Lỗi khi tải dữ liệu: " + e.message);
+            } finally {
+                document.getElementById('loading-overlay').classList.add('hidden');
+            }
+        }
+
+        async function loadGTCData() {
+            document.getElementById('loading-text').innerText = "Đang tải dữ liệu GTC Tổng...";
+            try {
+                let gtcObj = await fetchAndParseStackedSheet(GTC_TOTAL_URL);
+                globalData.gtc = { loaded: true, ...gtcObj };
+            } catch(e) { console.error("GTC Tổng failed", e); }
+            
+            document.getElementById('loading-text').innerText = "Đang tải dữ liệu GTC TTS...";
+            try {
+                let ttsObj = await fetchAndParseStackedSheet(GTC_TTS_URL);
+                globalData.tts = { loaded: true, ...ttsObj };
+            } catch(e) { console.error("GTC TTS failed", e); }
+
+            let allDates = new Set([
+                ...(globalData.gtc.dates || []), 
+                ...(globalData.tts.dates || [])
+            ]);
+            let sortedDates = Array.from(allDates).sort().reverse();
+            
+            let dateSelect = document.getElementById('date-filter');
+            dateSelect.innerHTML = '<option value="">-- Chọn ngày báo cáo --</option>';
+            sortedDates.forEach(d => {
+                dateSelect.innerHTML += `<option value="${d}">${d}</option>`;
+            });
+            
+            if (sortedDates.length > 0) {
+                globalData.activeDate = sortedDates[0];
+                dateSelect.value = sortedDates[0];
+            }
+            
+            // Re-call switchTab to render correct state
+            switchTab('gtc');
+        }
+
+        function handleDateChange(dateVal) {
+            if(!dateVal) return;
+            globalData.activeDate = dateVal;
+            if (globalData.activeTab === 'gtc' || globalData.activeTab === 'tts') {
+                renderCurrentGTCData();
+            }
+        }
+
+        // --- Renderers ---
+        // --- Teleram / Utils ---
+        function exportTelegram() {
+            let active = document.querySelector('.view-container.active').id;
+            if (active === 'view-gtc') {
+                alert("Đã Copy thành công! Bạn có thể Paste vào Telegram.");
+            } else {
+                alert("Tính năng gửi báo cáo này đang được xây dựng.");
+            }
+        }
+
+        // --- Render / Update logic ---
+        function handleFileUpload(event) {
+            let file = event.target.files[0];
+            if(!file) return;
+            alert(`Đã nhận file ${file.name}, tính năng đồng bộ thô đang được xử lý...`);
+        }
+
+        function formatTrend(valStr) {
+            let val = parseFloat(valStr.replace('%',''));
+            if(isNaN(val)) return `<span class="kpi-sub" style="color:var(--text-gray)">--</span>`;
+            if(val > 0) return `<span class="kpi-sub trend-up"><i class="fa-solid fa-arrow-up"></i> ${valStr}</span>`;
+            if(val < 0) return `<span class="kpi-sub trend-down"><i class="fa-solid fa-arrow-down"></i> ${valStr}</span>`;
+            return `<span class="kpi-sub" style="color:var(--text-gray)">${valStr}</span>`;
+        }
+
+        function getGradientColor(val, min, max) {
+            if(val <= min) return '#e67c73'; // Max Red
+            if(val >= max) return '#ffffff'; // White
+            
+            let ratio = (val - min) / (max - min);
+            let r = Math.round(230 + (255 - 230) * ratio);
+            let g = Math.round(124 + (255 - 124) * ratio);
+            let b = Math.round(115 + (255 - 115) * ratio);
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function renderCurrentGTCData() {
+            let tab = globalData.activeTab;
+            let dataset = globalData[tab];
+            let activeDate = globalData.activeDate;
+            
+            document.getElementById('date-display').innerText = `Dữ liệu thực tế ngày: ${activeDate}`;
+            document.getElementById('gtc-date').innerText = activeDate;
+            document.querySelectorAll('.gtc-date-header').forEach(el => el.innerText = activeDate);
+            
+            let tbody = document.getElementById('gtc-tbody');
+            tbody.innerHTML = "";
+            
+            if (!dataset || !dataset.loaded || !dataset.dataByDate[activeDate]) {
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 2rem;">Không có dữ liệu cho ngày này.</td></tr>`;
+                return;
+            }
+            
+            let dayData = dataset.dataByDate[activeDate];
+            let ams = dayData.ams;
+            let min = dayData.minGTC;
+            let max = dayData.maxGTC;
+
+            function renderRow(amObj, isTotalRow) {
+                let tr = document.createElement('tr');
+                if(isTotalRow) tr.className = "total-row";
+
+                let ca1 = amObj.ca1 || {}; let ca2 = amObj.ca2 || {}; let ton = amObj.ton || {}; let tot = amObj.total || {};
+                
+                let finalGtcColor = isTotalRow ? "" : `background-color: ${getGradientColor(tot.gtc, min, max)};`;
+                let finalGtcClass = isTotalRow ? "" : "font-bold";
+                if(!isTotalRow && tot.gtc < 0.75) finalGtcClass += " text-red"; 
+
+                tr.innerHTML = `
+                    <td>${amObj.name}</td>
+                    <td class="col-ca1">${formatNumber(ca1.vol)}</td><td class="col-ca1">${formatPercent(ca1.gan)}</td><td class="col-ca1">${formatPercent(ca1.gtc)}</td>
+                    <td class="col-ca2">${formatNumber(ca2.vol)}</td><td class="col-ca2">${formatPercent(ca2.gan)}</td><td class="col-ca2">${formatPercent(ca2.gtc)}</td>
+                    <td class="col-ton">${formatNumber(ton.vol)}</td><td class="col-ton">${formatPercent(ton.gan)}</td><td class="col-ton">${formatPercent(ton.gtc)}</td>
+                    <td class="col-tong font-bold">${formatNumber(tot.vol)}</td>
+                    <td class="col-tong font-bold">${formatPercent(tot.gan)}</td>
+                    <td class="${finalGtcClass}" style="${finalGtcColor} font-size: 0.95rem;">${formatPercent(tot.gtc)}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            ams.forEach(am => renderRow(am, false));
+
+            if(dayData.grandTotal) {
+                renderRow(dayData.grandTotal, true);
+            }
+        }
+
+
+        // --- Org Data Loaders & Renderers ---
+        async function loadOrgData() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            document.getElementById('loading-text').innerText = "Đang đồng bộ Sơ Đồ Tổ Chức...";
+            try {
+                const data = await parsePapa(ORG_CSV_URL);
+
+                // 7 Tỉnh quy định
+                const allowedProvinces = ["Đà Nẵng", "Quảng Nam", "Thừa Thiên Huế", "Quảng Trị", "Quảng Bình", "Kon Tum", "Quảng Ngãi"];
+
+                let whMap = {}; 
+                let amSet = new Set();
+                
+                data.forEach(rawRow => {
+                    let row = {};
+                    for(let k in rawRow) {
+                        row[k.trim()] = rawRow[k];
+                    }
+                    
+                    let whId = row['ID Bưu cục'];
+                    let whName = row['Bưu cục'];
+                    let rawProv = row['Tỉnh'];
+                    let distName = row['Huyện'];
+                    let wardName = row['Phường Xã'];
+                    let amName = row['AM Quản lý'] || "Chưa phân bổ";
+                    
+                    if(!whId || !rawProv || !whName) return;
+                    
+                    let provName = rawProv.trim();
+                    if(provName === "Huế") provName = "Thừa Thiên Huế";
+                    
+                    if(!allowedProvinces.includes(provName)) return;
+                    
+                    let excludeAMs = ["Lương Vĩnh Quốc Trọng", "Trương Minh Dũng"];
+                    if(excludeAMs.includes(amName)) return;
+                    
+                    if(amName !== "Chưa phân bổ") amSet.add(amName);
+                    
+                    if(!whMap[whId]) {
+                        whMap[whId] = {
+                            id: whId,
+                            name: whName,
+                            am: amName,
+                            prov: provName,
+                            dist: distName || "Chưa xác định",
+                            wards: []
+                        };
+                    }
+                    if(wardName && !whMap[whId].wards.includes(wardName)) {
+                        whMap[whId].wards.push(wardName);
+                    }
+                });
+                
+                // Build treeMap cho UI
+                let treeMap = {};
+                Object.values(whMap).forEach(wh => {
+                    if(!treeMap[wh.prov]) treeMap[wh.prov] = {};
+                    if(!treeMap[wh.prov][wh.dist]) treeMap[wh.prov][wh.dist] = {};
+                    treeMap[wh.prov][wh.dist][wh.id] = wh;
+                });
+
+                globalData.org.dataMap = treeMap;
+                globalData.org.ams = Array.from(amSet).sort();
+                globalData.org.provinces = allowedProvinces.filter(p => treeMap[p]); // Sort theo mảng quy định
+                globalData.org.loaded = true;
+                if(globalData.org.provinces.length > 0) {
+                    globalData.org.activeProv = globalData.org.provinces[0]; // Mặc định chọn tỉnh đầu tiên
+                }
+
+                // Populate filters
+                const amFilter = document.getElementById('filter-am');
+                amFilter.innerHTML = '<option value="ALL">-- Tất cả AM --</option>'; // Reset dropdown
+                globalData.org.ams.forEach(a => {
+                    let opt = document.createElement('option');
+                    opt.value = a; opt.innerText = a;
+                    amFilter.appendChild(opt);
+                });
+
+                renderOrgSidebar();
+                renderOrgView();
+            } catch(e) {
+                console.error(e);
+                alert("Lỗi khi tải dữ liệu Cơ cấu: " + e.message);
+            } finally {
+                document.getElementById('loading-overlay').classList.add('hidden');
+            }
+        }
+
+        function setOrgProv(provName) {
+            globalData.org.activeProv = provName;
+            renderOrgSidebar();
+            renderOrgView();
+        }
+
+        function toggleWard(el) {
+            el.closest('.wh-card').classList.toggle('expanded');
+        }
+
+        function renderOrgSidebar() {
+            const list = document.getElementById('org-prov-list');
+            list.innerHTML = '';
+            
+            globalData.org.provinces.forEach(provName => {
+                let isActive = provName === globalData.org.activeProv;
+                
+                // Count Bưu cục
+                let bcCount = 0;
+                let dists = globalData.org.dataMap[provName];
+                for(let d in dists) {
+                    bcCount += Object.keys(dists[d]).length;
+                }
+                
+                let li = document.createElement('li');
+                li.className = `prov-item ${isActive ? 'active' : ''}`;
+                li.onclick = () => setOrgProv(provName);
+                li.innerHTML = `<span><i class="${isActive ? 'fa-solid' : 'fa-regular'} fa-folder-open" style="color:var(--ghn-orange)"></i> ${provName}</span> <span class="prov-count">${bcCount} BC</span>`;
+                list.appendChild(li);
+            });
+        }
+
+        function renderOrgView() {
+            const grid = document.getElementById('org-wh-grid');
+            const amFilter = document.getElementById('filter-am').value;
+            const searchQ = document.getElementById('search-org').value.toLowerCase().trim();
+            
+            grid.innerHTML = '';
+            
+            const provName = globalData.org.activeProv;
+            const dists = globalData.org.dataMap[provName];
+            
+            if(!dists) return;
+            
+            let matchCount = 0;
+            
+            for(let distName in dists) {
+                for(let whId in dists[distName]) {
+                    let wh = dists[distName][whId];
+                    
+                    if(amFilter !== 'ALL' && wh.am !== amFilter) continue;
+                    
+                    let whMatch = wh.name.toLowerCase().includes(searchQ) || wh.am.toLowerCase().includes(searchQ) || distName.toLowerCase().includes(searchQ);
+                    
+                    let wardMatch = false;
+                    wh.wards.forEach(w => {
+                        if(w.toLowerCase().includes(searchQ)) { wardMatch = true; }
+                    });
+                    
+                    if(!whMatch && !wardMatch && searchQ !== '') continue;
+                    
+                    matchCount++;
+                    
+                    let wardHtml = wh.wards.map(w => `<span class="ward-pill">${w}</span>`).join('');
+                    
+                    let card = document.createElement('div');
+                    card.className = "wh-card";
+                    card.innerHTML = `
+                        <div class="wh-header">
+                            <div class="wh-title">
+                                <div><i class="fa-solid fa-house-user" style="color: var(--ghn-orange)"></i> ${wh.name}</div>
+                                <span class="wh-id">${whId}</span>
+                            </div>
+                            <div class="wh-dist"><i class="fa-solid fa-map-location-dot"></i> ${distName}</div>
+                        </div>
+                        <div class="wh-body">
+                            <div class="wh-staff">
+                                <div class="staff-row">
+                                    <span class="staff-label"><i class="fa-solid fa-user-tie"></i> AM Phụ trách</span>
+                                    <span class="staff-val">${wh.am}</span>
+                                </div>
+                            </div>
+                            <button class="ward-toggle" onclick="toggleWard(this)">
+                                <span><i class="fa-solid fa-location-crosshairs"></i> Phụ trách ${wh.wards.length} Phường/Xã</span>
+                                <i class="fa-solid fa-chevron-down" style="transition: transform 0.2s"></i>
+                            </button>
+                            <div class="ward-content">
+                                ${wardHtml || "<i>Không có dữ liệu Phường/Xã</i>"}
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+            }
+            
+            if(matchCount === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-gray); font-size: 1.1rem; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">Không tìm thấy bưu cục nào phù hợp!</div>`;
+            }
+        }
+
+        // --- Export GTC ---
+        function exportGTCToSheet() {
+            if(!globalData.gtc.ams || globalData.gtc.ams.length === 0) {
+                alert("Chưa có dữ liệu GTC!"); return;
+            }
+
+            // Thứ tự AM cố định theo file Google Sheet của sếp
+            const targetAms = [
+                "Phan Văn Chánh", "Nguyễn Trọng Ánh", "Dương Ngọc Lê", "Phạm Thế Vũ",
+                "Trần Thiên Phiến", "Bùi Đức Dũng", "Nguyễn Sỹ Tiến", "Trương Hữu Dũng",
+                "Nguyễn Ngọc Nhân", "Võ Thúy Nhi", "Võ Nhật Hạ", "Phùng Thị Ngọc Hà",
+                "Nguyễn Tấn Tài", "Nguyễn Trọng Bách", "Grand Total"
+            ];
+
+            let tsvContent = "";
+
+            targetAms.forEach(amName => {
+                let amObj = null;
+                if(amName === "Grand Total") {
+                    amObj = globalData.gtc.grandTotal;
+                } else {
+                    amObj = globalData.gtc.ams.find(a => normalizeBranchName(a.name) === normalizeBranchName(amName));
+                }
+
+                if(amObj) {
+                    let ca1 = amObj.ca1 || {}; let ca2 = amObj.ca2 || {}; let ton = amObj.ton || {}; let tot = amObj.total || {};
+                    let row = [
+                        ca1.vol || "", formatPercentPlain(ca1.gan), formatPercentPlain(ca1.gtc),
+                        ca2.vol || "", formatPercentPlain(ca2.gan), formatPercentPlain(ca2.gtc),
+                        ton.vol || "", formatPercentPlain(ton.gan), formatPercentPlain(ton.gtc),
+                        tot.vol || "", formatPercentPlain(tot.gan), formatPercentPlain(tot.gtc)
+                    ];
+                    tsvContent += row.join("\\t") + "\\n";
+                } else {
+                    tsvContent += "\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\n";
+                }
+            });
+
+            navigator.clipboard.writeText(tsvContent).then(() => {
+                alert("Đã Copy thành công! Bạn hãy mở Google Sheet, bấm chuột phải vào ô B5 (Hàng mới ca 1 - Volume của Phan Văn Chánh) và chọn Paste (Dán) nhé!");
+            }).catch(err => {
+                alert("Lỗi Copy: " + err);
+            });
+        }
+
+        function formatPercentPlain(val) {
+            if(!val || isNaN(val)) return "";
+            return (parseFloat(val) * 100).toFixed(2) + "%";
+        }
+
+        // --- Export GTC ---
+        function exportGTCToSheet() {
+            if(!globalData.gtc.ams || globalData.gtc.ams.length === 0) {
+                alert("Chưa có dữ liệu GTC!"); return;
+            }
+
+            // Thứ tự AM cố định theo file Google Sheet của sếp
+            const targetAms = [
+                "Phan Văn Chánh", "Nguyễn Trọng Ánh", "Dương Ngọc Lê", "Phạm Thế Vũ",
+                "Trần Thiên Phiến", "Bùi Đức Dũng", "Nguyễn Sỹ Tiến", "Trương Hữu Dũng",
+                "Nguyễn Ngọc Nhân", "Võ Thúy Nhi", "Võ Nhật Hạ", "Phùng Thị Ngọc Hà",
+                "Nguyễn Tấn Tài", "Nguyễn Trọng Bách", "Grand Total"
+            ];
+
+            let tsvContent = "";
+
+            targetAms.forEach(amName => {
+                let amObj = null;
+                if(amName === "Grand Total") {
+                    amObj = globalData.gtc.grandTotal;
+                } else {
+                    amObj = globalData.gtc.ams.find(a => normalizeBranchName(a.name) === normalizeBranchName(amName));
+                }
+
+                if(amObj) {
+                    let ca1 = amObj.ca1 || {}; let ca2 = amObj.ca2 || {}; let ton = amObj.ton || {}; let tot = amObj.total || {};
+                    let row = [
+                        ca1.vol || "", formatPercentPlain(ca1.gan), formatPercentPlain(ca1.gtc),
+                        ca2.vol || "", formatPercentPlain(ca2.gan), formatPercentPlain(ca2.gtc),
+                        ton.vol || "", formatPercentPlain(ton.gan), formatPercentPlain(ton.gtc),
+                        tot.vol || "", formatPercentPlain(tot.gan), formatPercentPlain(tot.gtc)
+                    ];
+                    tsvContent += row.join("\\t") + "\\n";
+                } else {
+                    tsvContent += "\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\n";
+                }
+            });
+
+            navigator.clipboard.writeText(tsvContent).then(() => {
+                alert("Đã Copy thành công! Bạn hãy mở Google Sheet, bấm chuột phải vào ô B5 (Hàng mới ca 1 - Volume của Phan Văn Chánh) và chọn Paste (Dán) nhé!");
+            }).catch(err => {
+                alert("Lỗi Copy: " + err);
+            });
+        }
+
+        function formatPercentPlain(val) {
+            if(!val || isNaN(val)) return "";
+            return (parseFloat(val) * 100).toFixed(2) + "%";
+        }
+
+        // --- Init ---
+        window.onload = loadAllData;
+    </script>
+</body>
+</html>

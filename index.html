@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitality Compass</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f7f9f8;
+            --text-color: #2c3e50;
+            --accent-color: #8da399; 
+            --accent-light: #e2e8e5;
+            --completed-color: #bdc3c7;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0,0,0,0.03);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0; padding: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto; padding: 2rem;
+            display: grid;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 2rem;
+        }
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem; grid-column: 1 / -1;
+        }
+        .header-title h1 {
+            margin: 0; font-weight: 300; letter-spacing: -0.5px; font-size: 2.2rem;
+        }
+        .header-actions button {
+            background-color: var(--card-bg); border: 1px solid var(--accent-light);
+            padding: 0.6rem 1.2rem; border-radius: 20px; cursor: pointer;
+            color: var(--text-color); font-family: inherit; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 0.5rem; transition: var(--transition);
+        }
+        .header-actions button:hover { background-color: var(--accent-light); }
+        .btn-primary { background-color: var(--accent-color) !important; color: white !important; border: none !important; padding: 0.8rem 1.5rem !important; font-size: 1rem !important; }
+        
+        .quick-input {
+            grid-column: 1 / -1;
+            display: flex; gap: 1rem; margin-bottom: 0.5rem;
+            background: var(--card-bg); padding: 0.5rem 1rem; border-radius: 50px;
+            box-shadow: var(--shadow); align-items: center; border: 1px solid var(--accent-light);
+        }
+        .quick-input input[type="text"] {
+            flex: 1; border: none; background: transparent; font-size: 1rem; padding: 0.5rem 0; outline: none; font-family: inherit;
+        }
+        .quick-input select {
+            border: 1px solid var(--accent-light); border-radius: 20px; padding: 0.4rem 1rem; background: var(--bg-color); font-family: inherit; cursor: pointer; outline: none;
+        }
+        .quick-input button {
+            background-color: var(--text-color); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; transition: var(--transition);
+        }
+        .quick-input button:hover { background-color: var(--accent-color); }
+
+        .progress-wrapper {
+            background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius);
+            box-shadow: var(--shadow); grid-column: 1 / -1; margin-bottom: 0.5rem;
+        }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: #7f8c8d; }
+        .progress-bar-container { height: 8px; background-color: var(--accent-light); border-radius: 4px; overflow: hidden; }
+        .progress-bar { height: 100%; background-color: var(--accent-color); width: 0%; transition: width 1s ease-in-out; }
+
+        .main-col { display: flex; flex-direction: column; gap: 1.5rem; }
+        .side-col { display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        .card { background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); }
+        .card-header { margin-bottom: 1rem; border-bottom: 1px solid var(--accent-light); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;}
+        .card-header h2 { margin: 0; font-size: 1.1rem; font-weight: 500; }
+        
+        .task-list { list-style: none; padding: 0; margin: 0; }
+        .task-item { display: flex; align-items: flex-start; padding: 0.7rem 0; border-bottom: 1px solid #f1f4f3; transition: var(--transition); }
+        .task-item:last-child { border-bottom: none; }
+        .task-checkbox { margin-top: 4px; margin-right: 12px; cursor: pointer; width: 16px; height: 16px; accent-color: var(--accent-color); }
+        .task-content { flex: 1; font-size: 0.95rem; }
+        .task-item.completed .task-content { text-decoration: line-through; color: var(--completed-color); }
+        
+        .switch { position: relative; display: inline-block; width: 34px; height: 18px; margin-right: 12px; margin-top: 2px; flex-shrink: 0;}
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--accent-light); transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        .add-task-inline { display: flex; margin-top: 0.5rem; gap: 0.5rem; }
+        .add-task-inline input { flex: 1; padding: 0.5rem; border: 1px dashed var(--accent-light); border-radius: 4px; background: transparent; font-family: inherit; font-size: 0.9rem;}
+        .add-task-inline input:focus { outline: none; border-color: var(--accent-color); }
+        
+        .chart-container { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 1rem; }
+        .hidden { display: none !important; }
+        
+        .icon-btn { cursor: pointer; color: #95a5a6; transition: 0.2s; background: none; border:none; padding:0;}
+        .icon-btn:hover { color: var(--accent-color); }
+
+        /* Report View CSS */
+        .container-content { display: contents; }
+        .report-controls { grid-column: 1 / -1; display: flex; gap: 1rem; background: var(--card-bg); padding: 1rem 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); align-items: center; }
+        .report-controls input { flex: 1; padding: 0.6rem 1rem; border: 1px solid var(--accent-light); border-radius: 20px; font-family: inherit; font-size: 0.9rem;}
+        .table-responsive { overflow-x: auto; grid-column: 1 / -1; background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .data-table th, .data-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--accent-light); }
+        .data-table th { font-weight: 600; color: #7f8c8d; background: #f8f9f9; }
+        .report-chart-container { height: 300px; width: 100%; }
+        .export-box { width: 100%; height: 200px; padding: 1rem; font-family: monospace; font-size: 0.85rem; border: 1px dashed var(--accent-light); border-radius: 8px; resize: vertical; margin-top: 1rem; background: #fdfdfd;}
+    </style>
+</head>
+<body>
+
+<div id="overlay">
+    <h1 style="font-weight: 300; font-size: 3rem; color: #8da399; margin-bottom: 0;">Vitality Compass</h1>
+    <p style="color: #7f8c8d; max-width: 400px; margin-bottom: 2rem;">Hệ thống yêu cầu quyền truy cập thư mục gốc "LDN PA" để đồng bộ thời gian thực với Obsidian.</p>
+    <button class="btn-primary" onclick="initApp()"><i class="fa-regular fa-folder-open"></i> Chọn thư mục hệ thống</button>
+</div>
+
+<div class="container hidden" id="app">
+    <header>
+        <div class="header-title">
+            <h1>Vitality Compass</h1>
+        </div>
+        <div class="header-actions" style="display: flex; gap: 0.5rem;">
+            <button id="btn-toggle-view" onclick="toggleView()"><i class="fa-solid fa-chart-line"></i> Báo Cáo Vùng</button>
+            <button onclick="refreshData()"><i class="fa-solid fa-rotate-right"></i> Làm mới</button>
+        </div>
+    </header>
+    <!-- TASK VIEW -->
+    <div id="task-view-container" class="container-content">
+        <div class="quick-input">
+            <i class="fa-solid fa-bolt" style="color: #f1c40f; margin-left: 0.5rem;"></i>
+        <input type="text" id="quick-input-text" placeholder="Gõ ý tưởng hoặc tác vụ phát sinh vào đây..." onkeypress="if(event.key === 'Enter') handleQuickInput()">
+        <select id="quick-input-dest">
+            <option value="notebook_idea">💡 Ý tưởng đột xuất</option>
+            <option value="notebook_urgent_today">🚨 Gấp hôm nay</option>
+            <option value="notebook_urgent_tomorrow">🌅 Gấp ngày mai</option>
+            <option value="notebook_not_urgent">🛋️ Không gấp (Thuộc dự án)</option>
+            <option value="task_future">🔭 Tầm nhìn xa</option>
+        </select>
+        <button onclick="handleQuickInput()"><i class="fa-solid fa-arrow-up"></i></button>
+    </div>
+
+    <div class="progress-wrapper">
+        <div class="progress-header">
+            <span>Tiến độ hệ thống trong ngày</span>
+            <span id="progress-text">0%</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="main-col">
+        <!-- Top 3 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🎯 Tiêu Điểm Tựu Thành</h2>
+            </div>
+            <ul class="task-list" id="list-top3"></ul>
+            <div class="add-task-inline">
+                <input type="text" placeholder="+ Thêm tiêu điểm..." onkeypress="if(event.key === 'Enter') inlineAddTask(this, 'Task Systems.md', '## 🎯 Tiêu Điểm Tựu Thành (Top 3 Priorities)')">
+            </div>
+        </div>
+        
+        <!-- Creating & Reviewing -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="card">
+                <div class="card-header"><h2>✍️ Sáng tạo & Sản xuất</h2></div>
+                <ul class="task-list" id="list-creating"></ul>
+                <div class="add-task-inline">
+                    <input type="text" placeholder="+ Thêm tác vụ..." onkeypress="if(event.key === 'Enter') inlineAddTask(this, 'Task Systems.md', '## ✍️ Creating (Sáng tạo, sản xuất)')">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h2>🔍 Kiểm duyệt & Phê duyệt</h2></div>
+                <ul class="task-list" id="list-reviewing"></ul>
+                <div class="add-task-inline">
+                    <input type="text" placeholder="+ Thêm tác vụ..." onkeypress="if(event.key === 'Enter') inlineAddTask(this, 'Task Systems.md', '## 🔍 Reviewing (Kiểm duyệt, phê duyệt)')">
+                </div>
+            </div>
+        </div>
+
+        <!-- Connecting & Presencing -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="card">
+                <div class="card-header"><h2>🔗 Chuyển tiếp & Kết nối</h2></div>
+                <ul class="task-list" id="list-connecting"></ul>
+                <div class="add-task-inline">
+                    <input type="text" placeholder="+ Thêm tác vụ..." onkeypress="if(event.key === 'Enter') inlineAddTask(this, 'Task Systems.md', '## 🔗 Connecting (Chuyển tiếp, kết nối)')">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h2>🗣️ Hiện diện & Tương tác</h2></div>
+                <ul class="task-list" id="list-presencing"></ul>
+                <div class="add-task-inline">
+                    <input type="text" placeholder="+ Thêm tác vụ..." onkeypress="if(event.key === 'Enter') inlineAddTask(this, 'Task Systems.md', '## 🗣️ Presencing (Hiện diện, tương tác)')">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="side-col">
+        <!-- Radar Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Cân bằng Năng lượng</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Routines -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🔄 Thói quen hằng ngày</h2>
+            </div>
+            <ul class="task-list" id="list-routine"></ul>
+            <div class="add-task-inline">
+                <input type="text" placeholder="+ Thêm thói quen..." onkeypress="if(event.key === 'Enter') inlineAddTask(this, 'Task Systems.md', '## 🔄 Thói quen (Daily/Weekly Routines)')">
+            </div>
+        </div>
+
+        <!-- Contemplating -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🧘 Chiêm nghiệm & Đúc kết</h2>
+            </div>
+            <ul class="task-list" id="list-contemplating"></ul>
+            <div class="add-task-inline">
+                <input type="text" placeholder="+ Thêm task chiêm nghiệm..." onkeypress="if(event.key === 'Enter') inlineAddTask(this, 'Task Systems.md', '## 🧘 Contemplating (Chiêm nghiệm)')">
+            </div>
+        </div>
+    </div>
+    </div> <!-- END TASK VIEW -->
+
+    <!-- REPORT VIEW -->
+    <div id="report-view-container" class="container-content hidden">
+        <div class="report-controls">
+            <i class="fa-solid fa-link" style="color: #95a5a6;"></i>
+            <input type="text" id="sheet-url" value="https://docs.google.com/spreadsheets/d/1v1YBD90nrC3SRiFS4GKnbDYFw6vrawwJYel-TC6HSnQ/gviz/tq?tqx=out:csv&gid=0" placeholder="Link CSV từ Google Sheets (đã Publish hoặc gviz)">
+            <button class="btn-primary" onclick="loadReportData()"><i class="fa-solid fa-cloud-arrow-down"></i> Tải Dữ Liệu</button>
+            <button onclick="exportReport()"><i class="fa-solid fa-copy"></i> Xuất Báo Cáo</button>
+        </div>
+
+        <div class="card" style="grid-column: 1 / 2;">
+            <div class="card-header"><h2>📊 Sản lượng Giao (Tổng Ngày)</h2></div>
+            <div class="report-chart-container">
+                <canvas id="volumeChart"></canvas>
+            </div>
+        </div>
+        <div class="card" style="grid-column: 2 / 3;">
+            <div class="card-header"><h2>📈 Tỷ lệ Giao Thành Công (SLA)</h2></div>
+            <div class="report-chart-container">
+                <canvas id="slaChart"></canvas>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <div class="card-header"><h2>📋 Bảng Dữ Liệu Chi Tiết</h2></div>
+            <table class="data-table" id="report-table">
+                <thead>
+                    <tr>
+                        <th>AM</th>
+                        <th>Volume Tổng</th>
+                        <th>% Giao Thành Công</th>
+                        <th>Volume Hàng Mới</th>
+                        <th>Volume Hàng Tồn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- JS will populate -->
+                </tbody>
+            </table>
+            <textarea id="export-textarea" class="export-box hidden" readonly></textarea>
+        </div>
+    </div> <!-- END REPORT VIEW -->
+
+</div>
+
+<script>
+    let dirHandle;
+    let radarChartObj = null;
+
+    // Headings mapping
+    const MAPPINGS = {
+        'top3': '## 🎯 Tiêu Điểm Tựu Thành (Top 3 Priorities)',
+        'routine': '## 🔄 Thói quen (Daily/Weekly Routines)',
+        'creating': '## ✍️ Creating (Sáng tạo, sản xuất)',
+        'reviewing': '## 🔍 Reviewing (Kiểm duyệt, phê duyệt)',
+        'connecting': '## 🔗 Connecting (Chuyển tiếp, kết nối)',
+        'presencing': '## 🗣️ Presencing (Hiện diện, tương tác)',
+        'contemplating': '## 🧘 Contemplating (Chiêm nghiệm)'
+    };
+
+    const QUICK_DEST = {
+        'notebook_idea': { file: 'Notebook.md', heading: '## 💡 Ý tưởng đột xuất (Ideas)' },
+        'notebook_urgent_today': { file: 'Notebook.md', heading: '### 🚨 Gấp trong hôm nay' },
+        'notebook_urgent_tomorrow': { file: 'Notebook.md', heading: '### 🌅 Gấp trong ngày mai' },
+        'notebook_not_urgent': { file: 'Notebook.md', heading: '### 🛋️ Không gấp (Thuộc dự án)' },
+        'task_future': { file: 'Task Systems.md', heading: '## 🔭 Tầm nhìn xa (Ngày mai & Tuần tới)' }
+    };
+
+    async function initApp() {
+        try {
+            dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+            document.getElementById('overlay').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            await refreshData();
+        } catch (error) {
+            console.error("Yêu cầu chọn thư mục thất bại:", error);
+            alert("Bạn cần cấp quyền truy cập thư mục để sử dụng hệ thống.");
+        }
+    }
+
+    async function readFile(fileName) {
+        try {
+            const fileHandle = await dirHandle.getFileHandle(fileName, { create: false });
+            const file = await fileHandle.getFile();
+            return await file.text();
+        } catch (e) {
+            console.warn(`File ${fileName} chưa tồn tại hoặc lỗi đọc.`);
+            return "";
+        }
+    }
+
+    async function writeFileTarget(fileName, content) {
+        try {
+            const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(content);
+            await writable.close();
+        } catch (e) {
+            console.error(`Lỗi khi ghi file ${fileName}`, e);
+            alert("Lỗi khi ghi file. Vui lòng thử lại!");
+        }
+    }
+
+    async function refreshData() {
+        const tsContent = await readFile('Task Systems.md');
+        if(!tsContent) return;
+        
+        const lines = tsContent.split('\n');
+        let currentSection = null;
+        
+        let data = {
+            'top3': [], 'routine': [], 'creating': [], 'reviewing': [], 'connecting': [], 'presencing': [], 'contemplating': []
+        };
+
+        for(let l of lines) {
+            let line = l.trim();
+            
+            // Checking mapping
+            let matched = false;
+            for(let key in MAPPINGS) {
+                if(l.startsWith(MAPPINGS[key])) {
+                    currentSection = key;
+                    matched = true;
+                    break;
+                }
+            }
+            if(matched) continue;
+            
+            if(l.startsWith('## ')) {
+                currentSection = null; // some other heading
+            }
+
+            if(currentSection && (line.startsWith('- [ ]') || line.startsWith('- [x]') || line.startsWith('- [X]'))) {
+                let isCompleted = line.toLowerCase().includes('- [x]');
+                let text = line.substring(5).trim();
+                data[currentSection].push({ original: l, text: text, isCompleted: isCompleted, fileName: 'Task Systems.md' });
+            }
+        }
+
+        renderLists(data);
+        updateProgressAndChart(data);
+    }
+
+    function renderLists(data) {
+        for(let key in data) {
+            const ul = document.getElementById(`list-${key}`);
+            if(!ul) continue;
+            ul.innerHTML = '';
+            
+            data[key].forEach(task => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.isCompleted ? 'completed' : ''}`;
+                
+                let checkboxHTML = '';
+                if(key === 'routine') {
+                    checkboxHTML = `<label class="switch"><input type="checkbox" ${task.isCompleted ? 'checked' : ''} onchange="toggleTask('${task.fileName}', \`${escapeHTML(task.original)}\`, this.checked)"><span class="slider"></span></label>`;
+                } else {
+                    checkboxHTML = `<input type="checkbox" class="task-checkbox" ${task.isCompleted ? 'checked' : ''} onchange="toggleTask('${task.fileName}', \`${escapeHTML(task.original)}\`, this.checked)">`;
+                }
+
+                li.innerHTML = `
+                    ${checkboxHTML}
+                    <div class="task-content">${task.text}</div>
+                `;
+                ul.appendChild(li);
+            });
+        }
+    }
+
+    async function toggleTask(fileName, originalLine, isChecked) {
+        let content = await readFile(fileName);
+        let replaceWith = isChecked ? originalLine.replace('- [ ]', '- [x]') : originalLine.replace(/- \[x\]/i, '- [ ]');
+        
+        // Simple replace first occurrence
+        content = content.replace(originalLine, replaceWith);
+        await writeFileTarget(fileName, content);
+        await refreshData(); // Render lại hệ thống cục bộ
+    }
+
+    async function handleQuickInput() {
+        const input = document.getElementById('quick-input-text');
+        const dest = document.getElementById('quick-input-dest').value;
+        const text = input.value.trim();
+        if(!text) return;
+        
+        const conf = QUICK_DEST[dest];
+        // append rule for list
+        let prefix = text.startsWith('- ') ? '' : '- [ ] ';
+        if (dest === 'notebook_idea') prefix = '- '; // ideas might not be tasks
+
+        await insertIntoFile(conf.file, conf.heading, prefix + text);
+        
+        input.value = '';
+        await refreshData();
+    }
+
+    async function inlineAddTask(inputEl, fileName, heading) {
+        const text = inputEl.value.trim();
+        if(!text) return;
+        
+        await insertIntoFile(fileName, heading, '- [ ] ' + text);
+        
+        inputEl.value = '';
+        await refreshData();
+    }
+
+    async function insertIntoFile(fileName, exactHeading, contentToInsert) {
+        let content = await readFile(fileName);
+        let lines = content.split('\n');
+        
+        let index = -1;
+        for(let i=0; i<lines.length; i++){
+            if(lines[i].startsWith(exactHeading)){
+                index = i;
+                break;
+            }
+        }
+
+        if(index > -1) {
+            let insertIdx = index + 1;
+            while(insertIdx < lines.length && (lines[insertIdx].trim() === '' || lines[insertIdx].startsWith('- '))) {
+                insertIdx++;
+            }
+            lines.splice(insertIdx, 0, contentToInsert);
+            await writeFileTarget(fileName, lines.join('\n'));
+        } else {
+            console.warn("Không tìm thấy heading", exactHeading, "trong file", fileName);
+        }
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, 
+            tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag])
+        ).replace(/\\/g, '\\\\'); // escape backslashes for JS template literal
+    }
+
+    function updateProgressAndChart(data) {
+        let total = 0;
+        let completed = 0;
+        
+        let chartData = [0, 0, 0, 0, 0]; // Creating, Reviewing, Connecting, Presencing, Contemplating
+        let chartKeys = ['creating', 'reviewing', 'connecting', 'presencing', 'contemplating'];
+
+        for(let key in data) {
+            const arr = data[key];
+            if(key !== 'routine') { // Exclude routine from overall progress to focus on actual tasks? Let's include everything except maybe routine, but wait - top3 is key!
+                total += arr.length;
+                let comp = arr.filter(t => t.isCompleted).length;
+                completed += comp;
+            }
+            
+            // For chart
+            let idx = chartKeys.indexOf(key);
+            if(idx > -1) {
+                chartData[idx] = arr.filter(t => t.isCompleted).length; // Map completed energy to radar
+            }
+        }
+
+        let percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('progress-text').innerText = percent + '% (' + completed + '/' + total + ')';
+
+        renderChart(chartData);
+    }
+
+    function renderChart(dataArr) {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        if(radarChartObj) radarChartObj.destroy();
+        
+        radarChartObj = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Sáng tạo', 'Kiểm duyệt', 'Kết nối', 'Hiện diện', 'Chiêm nghiệm'],
+                datasets: [{
+                    label: 'Thành tựu Tác vụ',
+                    data: dataArr,
+                    backgroundColor: 'rgba(141, 163, 153, 0.2)', // var(--accent-color) with opacity
+                    borderColor: '#8da399',
+                    pointBackgroundColor: '#8da399',
+                    borderWidth: 2,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        ticks: { display: false, stepSize: 1 },
+                        grid: { color: '#e2e8e5' },
+                        pointLabels: {
+                            font: { family: 'Inter', size: 10 },
+                            color: '#7f8c8d'
+                        }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // --- REPORT LOGIC ---
+    let currentView = 'task';
+    let volumeChartObj = null;
+    let slaChartObj = null;
+    let reportDataCache = [];
+
+    function toggleView() {
+        const taskView = document.getElementById('task-view-container');
+        const reportView = document.getElementById('report-view-container');
+        const btnToggle = document.getElementById('btn-toggle-view');
+
+        if(currentView === 'task') {
+            taskView.classList.add('hidden');
+            reportView.classList.remove('hidden');
+            btnToggle.innerHTML = '<i class="fa-solid fa-list-check"></i> Quản Trị Tác Vụ';
+            currentView = 'report';
+            // Auto load on first switch if data is empty
+            if(reportDataCache.length === 0) {
+                loadReportData();
+            }
+        } else {
+            reportView.classList.add('hidden');
+            taskView.classList.remove('hidden');
+            btnToggle.innerHTML = '<i class="fa-solid fa-chart-line"></i> Báo Cáo Vùng';
+            currentView = 'task';
+        }
+    }
+
+    function parseCSVRow(text) {
+        let ret = [], inQuote = false, value = '';
+        for (let ch of text) {
+            if (inQuote) {
+                if (ch === '"') inQuote = false;
+                else value += ch;
+            } else {
+                if (ch === '"') inQuote = true;
+                else if (ch === ',') { ret.push(value.trim()); value = ''; }
+                else value += ch;
+            }
+        }
+        ret.push(value.trim());
+        return ret;
+    }
+
+    async function loadReportData() {
+        const btn = document.querySelector('button[onclick="loadReportData()"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
+        btn.disabled = true;
+
+        try {
+            const url = document.getElementById('sheet-url').value;
+            const res = await fetch(url);
+            const text = await res.text();
+            
+            const lines = text.split('\\n').filter(l => l.trim() !== '');
+            reportDataCache = [];
+            
+            let isReadingTotal = false;
+            
+            for(let i=0; i<lines.length; i++) {
+                let row = parseCSVRow(lines[i].trim());
+                if(row.length < 2) continue;
+                
+                // Locate the start of "BÁO CÁO KẾT QUẢ GIAO THÀNH CÔNG TỔNG NGÀY"
+                if(row.join(',').includes('BÁO CÁO KẾT QUẢ GIAO THÀNH CÔNG TỔNG NGÀY')) {
+                    isReadingTotal = true;
+                    i += 2; // skip header lines
+                    continue;
+                }
+                
+                // Stop if we hit TTS section or Grand Total
+                if(row.join(',').includes('BÁO CÁO KẾT QUẢ GIAO THÀNH CÔNG TTS NGÀY')) {
+                    break;
+                }
+                
+                if(isReadingTotal && row[1]) {
+                    const amName = row[1].trim();
+                    if(!amName || amName === 'Grand Total' || amName === '#N/A' || amName === 'AM') continue;
+                    
+                    // row[11] is Tổng Volume, row[13] is Tổng %GTC
+                    // row[2] is Volume hàng mới ca 1, row[5] is Volume hàng mới ca 2, row[8] is Volume hàng tồn
+                    const parseNumber = (val) => parseInt((val||'0').replace(/\\./g, '').replace(/,/g, '')) || 0;
+                    
+                    reportDataCache.push({
+                        am: amName,
+                        totalVol: parseNumber(row[11]),
+                        totalSLA: row[13] || '0%',
+                        newVol: parseNumber(row[2]) + parseNumber(row[5]),
+                        backlogVol: parseNumber(row[8])
+                    });
+                }
+            }
+            
+            if(reportDataCache.length > 0) {
+                renderReportCharts(reportDataCache);
+                renderReportTable(reportDataCache);
+            } else {
+                alert("Không tìm thấy dữ liệu báo cáo TỔNG NGÀY hợp lệ!");
+            }
+            
+        } catch(e) {
+            console.error(e);
+            alert("Lỗi khi tải dữ liệu! Vui lòng kiểm tra lại link. Lỗi: " + e.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    function renderReportCharts(data) {
+        // Sort by Volume desc for Chart
+        const sorted = [...data].sort((a,b) => b.totalVol - a.totalVol);
+        const labels = sorted.map(d => d.am.split(' ').pop()); // Get last name for shorter labels
+        
+        const volumes = sorted.map(d => d.totalVol);
+        const slas = sorted.map(d => parseFloat(d.totalSLA.replace('%','').replace(',','.')));
+
+        // Volume Chart
+        const ctxVol = document.getElementById('volumeChart').getContext('2d');
+        if(volumeChartObj) volumeChartObj.destroy();
+        volumeChartObj = new Chart(ctxVol, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sản lượng (Đơn)',
+                    data: volumes,
+                    backgroundColor: '#8da399',
+                    borderRadius: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // SLA Chart
+        const ctxSla = document.getElementById('slaChart').getContext('2d');
+        if(slaChartObj) slaChartObj.destroy();
+        slaChartObj = new Chart(ctxSla, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '% Giao Thành Công',
+                    data: slas,
+                    borderColor: '#f1c40f',
+                    backgroundColor: 'rgba(241, 196, 15, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: { y: { min: 0, max: 100 } }
+            }
+        });
+    }
+
+    function renderReportTable(data) {
+        const tbody = document.querySelector('#report-table tbody');
+        tbody.innerHTML = '';
+        let html = '';
+        data.forEach(d => {
+            html += `
+                <tr>
+                    <td><strong>${d.am}</strong></td>
+                    <td>${d.totalVol.toLocaleString('vi-VN')}</td>
+                    <td style="color: ${parseFloat(d.totalSLA.replace(',','.')) < 60 ? '#e74c3c' : '#27ae60'}"><strong>${d.totalSLA}</strong></td>
+                    <td>${d.newVol.toLocaleString('vi-VN')}</td>
+                    <td>${d.backlogVol.toLocaleString('vi-VN')}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function exportReport() {
+        if(reportDataCache.length === 0) {
+            alert("Chưa có dữ liệu để xuất báo cáo!");
+            return;
+        }
+        
+        let reportText = `📊 BÁO CÁO VẬN HÀNH VÙNG HCM - GIAO HÀNG NHANH\\n`;
+        reportText += `Ngày cập nhật: ${new Date().toLocaleDateString('vi-VN')}\\n`;
+        reportText += `-------------------------------------------\\n`;
+        
+        let totalVol = 0, totalNew = 0, totalBacklog = 0;
+        let lowestSLA = reportDataCache[0];
+
+        reportDataCache.forEach(d => {
+            totalVol += d.totalVol;
+            totalNew += d.newVol;
+            totalBacklog += d.backlogVol;
+            
+            let sla = parseFloat(d.totalSLA.replace('%','').replace(',','.'));
+            let lowest = parseFloat(lowestSLA.totalSLA.replace('%','').replace(',','.'));
+            if(sla < lowest) lowestSLA = d;
+        });
+
+        reportText += `1. TỔNG QUAN\\n`;
+        reportText += `- Tổng Sản Lượng: ${totalVol.toLocaleString('vi-VN')} đơn\\n`;
+        reportText += `- Hàng Mới: ${totalNew.toLocaleString('vi-VN')} đơn\\n`;
+        reportText += `- Hàng Tồn: ${totalBacklog.toLocaleString('vi-VN')} đơn\\n\\n`;
+        
+        reportText += `2. CÁC ĐIỂM NÓNG (CẦN LƯU Ý)\\n`;
+        reportText += `- Cụm có tỷ lệ GTC thấp nhất: ${lowestSLA.am} (${lowestSLA.totalSLA})\\n\\n`;
+        
+        reportText += `3. CHI TIẾT TỪNG AM\\n`;
+        reportDataCache.forEach(d => {
+            reportText += `• ${d.am}: ${d.totalVol.toLocaleString('vi-VN')} đơn | SLA: ${d.totalSLA}\\n`;
+        });
+
+        const textarea = document.getElementById('export-textarea');
+        textarea.value = reportText;
+        textarea.classList.remove('hidden');
+        
+        navigator.clipboard.writeText(reportText).then(() => {
+            alert("✅ Đã tạo báo cáo và Copy vào Clipboard! Bạn có thể dán vào Zalo/Email để gửi RD.");
+        }).catch(() => {
+            alert("Đã tạo báo cáo ở khung bên dưới. Hãy bôi đen và copy.");
+        });
+    }
+</script>
+
+</body>
+</html>
