@@ -480,21 +480,21 @@
 
         <!-- ================= HOME VIEW ================= -->
         <div id="view-home" class="view-container active">
-            <div style="background: var(--white) url('map_ttb.png?v=3') no-repeat center center; background-size: 800px; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); text-align: center; margin-bottom: 2rem; min-height: 800px; position: relative;">
-                <div style="background: rgba(255, 255, 255, 0.85); border-radius: 8px; padding: 1rem; display: inline-block;">
-                    <h2 style="color: var(--ghn-orange); margin-bottom: 0.5rem; font-size: 1.8rem; text-transform: uppercase;">BẢN ĐỒ VÙNG TRUNG TRUNG BỘ</h2>
-                    <p style="color: var(--text-gray); font-size: 1.1rem; font-style: italic; margin: 0;">
-                        (Khu vực hiển thị Biểu đồ và Cảnh báo hiệu suất dựa trên dữ liệu lịch sử sẽ được đặt chồng lên tại đây)
-                    </p>
-                </div>
+            <div style="background-color: var(--white); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); text-align: center; margin-bottom: 2rem; min-height: 800px; position: relative; overflow: hidden;">
                 
-                <!-- Placeholders cho các biểu đồ -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 3rem; text-align: left;">
-                    <div style="background: rgba(255, 255, 255, 0.9); border: 1px dashed #cbd5e1; padding: 2rem; border-radius: 12px; height: 300px; display: flex; align-items: center; justify-content: center; color: var(--text-gray); box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                        <i class="fa-solid fa-chart-line" style="font-size: 2rem; margin-right: 1rem; color: #94a3b8;"></i> Khu vực Biểu đồ Tỷ lệ GTC 7 Ngày
-                    </div>
-                    <div style="background: rgba(255, 255, 255, 0.9); border: 1px dashed #cbd5e1; padding: 2rem; border-radius: 12px; height: 300px; display: flex; align-items: center; justify-content: center; color: var(--text-gray); box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-right: 1rem; color: #ef4444;"></i> Cảnh báo AM có phong độ giảm sút
+                <!-- Lớp nền chìm (Watermark Map) -->
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('map_ttb.png?v=5') no-repeat center center; background-size: 800px; opacity: 0.15; pointer-events: none; z-index: 0;"></div>
+                
+                <!-- Lớp nội dung đè lên trên -->
+                <div style="position: relative; z-index: 1;">
+                    <!-- Placeholders cho các biểu đồ -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; text-align: left;">
+                        <div style="background: rgba(255, 255, 255, 0.85); border: 1px dashed #cbd5e1; padding: 2rem; border-radius: 12px; height: 350px; display: flex; align-items: center; justify-content: center; color: var(--text-gray); box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                            <i class="fa-solid fa-chart-line" style="font-size: 2rem; margin-right: 1rem; color: #94a3b8;"></i> Khu vực Biểu đồ Tỷ lệ GTC 7 Ngày
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.85); border: 1px dashed #cbd5e1; padding: 2rem; border-radius: 12px; height: 350px; display: flex; align-items: center; justify-content: center; color: var(--text-gray); box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                            <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-right: 1rem; color: #ef4444;"></i> Cảnh báo AM có phong độ giảm sút
+                        </div>
                     </div>
                 </div>
             </div>
