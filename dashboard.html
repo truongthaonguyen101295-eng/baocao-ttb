@@ -442,7 +442,8 @@
             </div>
             
             <ul class="nav-links">
-                <li id="nav-gtc" class="active" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> Báo Cáo GTC Tổng</li>
+                <li id="nav-home" class="active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Trang Chủ</li>
+                <li id="nav-gtc" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> Báo Cáo GTC Tổng</li>
                 <li id="nav-tts" onclick="switchTab('tts')"><i class="fa-solid fa-chart-pie"></i> Báo Cáo GTC TTS</li>
                 <li id="nav-ltc-tong" onclick="switchTab('ltc-tong')"><i class="fa-solid fa-box-open"></i> Báo Cáo LTC Tổng</li>
                 <li id="nav-ltc-tts" onclick="switchTab('ltc-tts')"><i class="fa-solid fa-boxes-packing"></i> Báo Cáo LTC TTS</li>
@@ -477,8 +478,19 @@
             </select>
         </div>
 
+        <!-- ================= HOME VIEW ================= -->
+        <div id="view-home" class="view-container active">
+            <div style="background: var(--white); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); text-align: center; margin-bottom: 2rem;">
+                <h2 style="color: var(--ghn-orange); margin-bottom: 1.5rem; font-size: 1.8rem; text-transform: uppercase;">BẢN ĐỒ VÙNG TRUNG TRUNG BỘ</h2>
+                <img src="map_ttb.png" alt="Map Trung Trung Bo" style="max-width: 100%; height: auto; border-radius: 8px;">
+                <p style="margin-top: 1.5rem; color: var(--text-gray); font-size: 1.1rem; font-style: italic;">
+                    (Khu vực hiển thị Biểu đồ và Cảnh báo hiệu suất dựa trên dữ liệu lịch sử sẽ được bổ sung tại đây)
+                </p>
+            </div>
+        </div>
+
         <!-- ================= GTC VIEW ================= -->
-        <div id="view-gtc" class="view-container active">
+        <div id="view-gtc" class="view-container">
             <div class="gtc-container">
                 <div class="gtc-title-row">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -588,7 +600,12 @@
 
             globalData.activeTab = tabId;
 
-            if (tabId === 'org') {
+            if (tabId === 'home') {
+                document.getElementById('view-home').classList.add('active');
+                document.getElementById('banner-title').innerText = "Trang Chủ - Vùng Trung Trung Bộ";
+                document.getElementById('date-display').innerText = "Tổng quan tình hình Vận hành";
+                document.getElementById('date-filter').style.display = 'none';
+            } else if (tabId === 'org') {
                 document.getElementById('view-org').classList.add('active');
                 document.getElementById('banner-title').innerText = "Sơ Đồ Tổ Chức Mạng Lưới - Trung Trung Bộ";
                 document.getElementById('date-display').innerText = "Dữ liệu cơ cấu nhân sự hiện tại";
