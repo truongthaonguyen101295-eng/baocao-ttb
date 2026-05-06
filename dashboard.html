@@ -401,6 +401,8 @@
         <ul class="nav-links">
             <li id="nav-gtc" class="active" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> Báo Cáo GTC Tổng</li>
             <li id="nav-tts" onclick="switchTab('tts')"><i class="fa-solid fa-chart-pie"></i> Báo Cáo GTC TTS</li>
+            <li id="nav-ltc-tong" onclick="switchTab('ltc-tong')"><i class="fa-solid fa-box-open"></i> Báo Cáo LTC Tổng</li>
+            <li id="nav-ltc-tts" onclick="switchTab('ltc-tts')"><i class="fa-solid fa-boxes-packing"></i> Báo Cáo LTC TTS</li>
             <li id="nav-org" onclick="switchTab('org')" style="display: none;"><i class="fa-solid fa-sitemap"></i> Cơ Cấu Tổ Chức</li>
         </ul>
     </nav>
@@ -446,13 +448,13 @@
                         </tr>
                         <tr>
                             <!-- Ca 1 -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
                             <!-- Ca 2 -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
                             <!-- Ton -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
                             <!-- Tong -->
-                            <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong">% GTC</th>
+                            <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong rate-header">% GTC</th>
                         </tr>
                     </thead>
                     <tbody id="gtc-tbody">
@@ -506,10 +508,14 @@
         const GTC_TOTAL_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=85996441";
         const GTC_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=0";
         const ORG_CSV_URL = "https://docs.google.com/spreadsheets/d/1ZXKLrjCQ3u9khiRmzzxQO9eSBS9RZAfdx777hmyKBqQ/export?format=csv&gid=0";
+        const LTC_TOTAL_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1642868721";
+        const LTC_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1262656134";
 
         let globalData = {
             gtc: { dates: [], dataByDate: {}, loaded: false },
             tts: { dates: [], dataByDate: {}, loaded: false },
+            'ltc-tong': { dates: [], dataByDate: {}, loaded: false },
+            'ltc-tts': { dates: [], dataByDate: {}, loaded: false },
             org: { loaded: false, dataMap: {}, ams: [], provinces: [] },
             activeDate: "",
             activeTab: "gtc"
@@ -533,17 +539,28 @@
                 document.getElementById('banner-title').innerText = "Sơ Đồ Tổ Chức Mạng Lưới - Trung Trung Bộ";
                 document.getElementById('date-display').innerText = "Dữ liệu cơ cấu nhân sự hiện tại";
                 document.getElementById('date-filter').style.display = 'none';
-            } else if (tabId === 'gtc' || tabId === 'tts') {
-                document.getElementById('view-gtc').classList.add('active'); // Dùng chung view cho 2 tab
+            } else if (tabId === 'gtc' || tabId === 'tts' || tabId === 'ltc-tong' || tabId === 'ltc-tts') {
+                document.getElementById('view-gtc').classList.add('active'); // Dùng chung view cho các tab GTC/LTC
                 document.getElementById('date-filter').style.display = 'inline-block';
                 
+                let rateText = "% GTC";
                 if (tabId === 'gtc') {
                     document.getElementById('banner-title').innerText = "Báo Cáo Vận Hành - GTC Tổng";
                     document.getElementById('gtc-table-title').innerText = "BÁO CÁO KẾT QUẢ GIAO THÀNH CÔNG TỔNG";
-                } else {
+                } else if (tabId === 'tts') {
                     document.getElementById('banner-title').innerText = "Báo Cáo Vận Hành - GTC TTS";
                     document.getElementById('gtc-table-title').innerText = "BÁO CÁO KẾT QUẢ GIAO THÀNH CÔNG TTS";
+                } else if (tabId === 'ltc-tong') {
+                    document.getElementById('banner-title').innerText = "Báo Cáo Vận Hành - LTC Tổng";
+                    document.getElementById('gtc-table-title').innerText = "BÁO CÁO KẾT QUẢ LẤY THÀNH CÔNG TỔNG";
+                    rateText = "% LTC";
+                } else if (tabId === 'ltc-tts') {
+                    document.getElementById('banner-title').innerText = "Báo Cáo Vận Hành - LTC TTS";
+                    document.getElementById('gtc-table-title').innerText = "BÁO CÁO KẾT QUẢ LẤY THÀNH CÔNG TTS";
+                    rateText = "% LTC";
                 }
+                
+                document.querySelectorAll('.rate-header').forEach(el => el.innerText = rateText);
                 
                 renderCurrentGTCData();
             }
@@ -662,7 +679,7 @@
                                     hTime = row.findIndex(c => normStr(c) === "time");
                                     hVol = row.findIndex(c => normStr(c) === "volume");
                                     hGan = row.findIndex(c => normStr(c) === "% gán");
-                                    hGTC = row.findIndex(c => normStr(c) === "% gtc");
+                                    hGTC = row.findIndex(c => normStr(c) === "% gtc" || normStr(c) === "% ltc");
                                     return; 
                                 }
 
@@ -748,8 +765,11 @@
                 document.getElementById('banner-title').innerText = "Báo Cáo Vận Hành - GTC Tổng";
                 
                 await Promise.all([
-                    loadGTCData()
+                    loadGTCData(),
+                    loadLTCData()
                 ]);
+                
+                populateDates();
             } catch(e) {
                 console.error(e);
                 alert("Lỗi khi tải dữ liệu: " + e.message);
@@ -771,9 +791,28 @@
                 globalData.tts = { loaded: true, ...ttsObj };
             } catch(e) { console.error("GTC TTS failed", e); }
 
+        }
+
+        async function loadLTCData() {
+            document.getElementById('loading-text').innerText = "Đang tải dữ liệu LTC Tổng...";
+            try {
+                let ltcObj = await fetchAndParseStackedSheet(LTC_TOTAL_URL);
+                globalData['ltc-tong'] = { loaded: true, ...ltcObj };
+            } catch(e) { console.error("LTC Tổng failed", e); }
+            
+            document.getElementById('loading-text').innerText = "Đang tải dữ liệu LTC TTS...";
+            try {
+                let ttsObj = await fetchAndParseStackedSheet(LTC_TTS_URL);
+                globalData['ltc-tts'] = { loaded: true, ...ttsObj };
+            } catch(e) { console.error("LTC TTS failed", e); }
+        }
+
+        function populateDates() {
             let allDates = new Set([
                 ...(globalData.gtc.dates || []), 
-                ...(globalData.tts.dates || [])
+                ...(globalData.tts.dates || []),
+                ...(globalData['ltc-tong'].dates || []),
+                ...(globalData['ltc-tts'].dates || [])
             ]);
             let sortedDates = Array.from(allDates).sort().reverse();
             
@@ -783,19 +822,18 @@
                 dateSelect.innerHTML += `<option value="${d}">${d}</option>`;
             });
             
-            if (sortedDates.length > 0) {
+            if (sortedDates.length > 0 && !globalData.activeDate) {
                 globalData.activeDate = sortedDates[0];
                 dateSelect.value = sortedDates[0];
             }
             
-            // Re-call switchTab to render correct state
-            switchTab('gtc');
+            switchTab(globalData.activeTab);
         }
 
         function handleDateChange(dateVal) {
             if(!dateVal) return;
             globalData.activeDate = dateVal;
-            if (globalData.activeTab === 'gtc' || globalData.activeTab === 'tts') {
+            if (['gtc', 'tts', 'ltc-tong', 'ltc-tts'].includes(globalData.activeTab)) {
                 renderCurrentGTCData();
             }
         }
