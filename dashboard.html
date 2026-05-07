@@ -570,7 +570,7 @@
                             </div>
                         </div>
                         <div style="background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; padding: 1.5rem; border-radius: 12px; height: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); overflow-y: auto;">
-                            <h3 style="margin-top: 0; margin-bottom: 1rem; color: #ef4444; font-size: 1.1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo Phong độ AM (Giảm > 2%)</h3>
+                            <h3 style="margin-top: 0; margin-bottom: 1rem; color: #ef4444; font-size: 1.1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo Phong độ AM (Top 3 Giảm sút)</h3>
                             <div id="am-alert-list" style="display: flex; flex-direction: column; gap: 0.8rem;">
                                 <div style="text-align: center; color: var(--text-gray); padding-top: 2rem;">Đang phân tích dữ liệu...</div>
                             </div>
@@ -1093,7 +1093,7 @@
                         let avg14 = sum14 / count14;
                         let diff = avg14 - avg3; // Drop amount
                         
-                        if (diff >= 0.02) { // 2% drop
+                        if (diff > 0) { // Any drop
                             alerts.push({
                                 name: am,
                                 avg3: avg3 * 100,
@@ -1105,6 +1105,7 @@
                 });
                 
                 alerts.sort((a,b) => b.diff - a.diff); // Sort by biggest drop
+                alerts = alerts.slice(0, 3); // Take top 3
             }
             
             // Render Alerts
