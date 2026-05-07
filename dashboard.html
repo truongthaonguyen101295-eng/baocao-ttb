@@ -665,6 +665,7 @@
         const GTC_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=0";
         const ORG_CSV_URL = "https://docs.google.com/spreadsheets/d/1ZXKLrjCQ3u9khiRmzzxQO9eSBS9RZAfdx777hmyKBqQ/export?format=csv&gid=0";
         const LTC_TOTAL_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1642868721";
+        const COMPARE_GTC_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1857120021";
         const LTC_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1262656134";
 
         let globalData = {
@@ -952,6 +953,36 @@
                 globalData.tts = { loaded: true, ...ttsObj };
             } catch(e) { console.error("GTC TTS failed", e); }
 
+            try {
+                let res = await fetch(COMPARE_GTC_URL);
+                let text = await res.text();
+                let parsed = Papa.parse(text, { header: false, skipEmptyLines: true });
+                let rows = parsed.data;
+                globalData.compareAlerts = [];
+                // Find data rows
+                for(let i = 0; i < rows.length; i++) {
+                    let row = rows[i];
+                    let amName = row[1];
+                    if (amName && amName !== 'Chi tiết' && amName !== 'GTC theo AM' && amName !== 'Grand Total') {
+                        let diffStr = row[row.length - 1]; // last column
+                        let wtdStr = row[row.length - 2];  // second to last
+                        if (diffStr && diffStr.includes('%')) {
+                            let diffVal = parseFloat(diffStr.replace('%', '').replace(',', '.'));
+                            let wtdVal = parseFloat(wtdStr.replace('%', '').replace(',', '.'));
+                            if (!isNaN(diffVal) && diffVal < 0) {
+                                globalData.compareAlerts.push({
+                                    name: amName,
+                                    diff: diffVal,
+                                    wtd: wtdVal
+                                });
+                            }
+                        }
+                    }
+                }
+                globalData.compareAlerts.sort((a, b) => a.diff - b.diff); // Most negative first
+            } catch(e) { console.error("Compare GTC failed", e); }
+
+
         }
 
         async function loadLTCData() {
@@ -1054,58 +1085,9 @@
             });
 
             // 2. Lọc Cảnh báo AM
-            // Tỷ lệ GTC TB 3 ngày gần nhất vs 14 ngày trước đó
-            let allDates = globalData.gtc.dates; // Newest to oldest
-            let last3Days = allDates.slice(0, 3);
-            let prev14Days = allDates.slice(3, 17);
+            let alerts = globalData.compareAlerts || [];
+            alerts = alerts.slice(0, 3); // Take top 3
             
-            let alerts = [];
-            
-            if (last3Days.length > 0 && prev14Days.length > 0) {
-                // Get list of all AMs from the most recent day
-                let latestDayData = globalData.gtc.dataByDate[allDates[0]];
-                let allAMs = Object.keys(latestDayData.amMap);
-                
-                allAMs.forEach(am => {
-                    if (am.toLowerCase() === 'grand total' || am.trim() === '') return;
-                    
-                    let sum3 = 0, count3 = 0;
-                    last3Days.forEach(d => {
-                        let amData = globalData.gtc.dataByDate[d]?.amMap[am];
-                        if (amData && amData.total && typeof amData.total.gtc === 'number') {
-                            sum3 += amData.total.gtc;
-                            count3++;
-                        }
-                    });
-                    
-                    let sum14 = 0, count14 = 0;
-                    prev14Days.forEach(d => {
-                        let amData = globalData.gtc.dataByDate[d]?.amMap[am];
-                        if (amData && amData.total && typeof amData.total.gtc === 'number') {
-                            sum14 += amData.total.gtc;
-                            count14++;
-                        }
-                    });
-                    
-                    if (count3 > 0 && count14 > 0) {
-                        let avg3 = sum3 / count3;
-                        let avg14 = sum14 / count14;
-                        let diff = avg14 - avg3; // Drop amount
-                        
-                        if (diff > 0) { // Any drop
-                            alerts.push({
-                                name: am,
-                                avg3: avg3 * 100,
-                                avg14: avg14 * 100,
-                                diff: diff * 100
-                            });
-                        }
-                    }
-                });
-                
-                alerts.sort((a,b) => b.diff - a.diff); // Sort by biggest drop
-                alerts = alerts.slice(0, 3); // Take top 3
-            }
             
             // Render Alerts
             let alertContainer = document.getElementById('am-alert-list');
@@ -1118,10 +1100,10 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 6px;">
                             <div>
                                 <div style="font-weight: bold; color: #7f1d1d;">${a.name}</div>
-                                <div style="font-size: 0.85rem; color: #991b1b; margin-top: 0.2rem;">TB 14 ngày: <b>${a.avg14.toFixed(1)}%</b> → TB 3 ngày: <b>${a.avg3.toFixed(1)}%</b></div>
+                                <div style="font-size: 0.85rem; color: #991b1b; margin-top: 0.2rem;">WTD Tuần này: <b>${a.wtd.toFixed(2)}%</b></div>
                             </div>
                             <div style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">
-                                <i class="fa-solid fa-arrow-trend-down"></i> -${a.diff.toFixed(1)}%
+                                <i class="fa-solid fa-arrow-trend-down"></i> ${a.diff.toFixed(2)}%
                             </div>
                         </div>
                     `;
