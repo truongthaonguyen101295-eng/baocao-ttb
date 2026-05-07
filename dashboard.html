@@ -425,6 +425,7 @@
         }
         .hidden { display: none !important; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -562,11 +563,17 @@
                 <div style="position: relative; z-index: 1;">
                     <!-- Placeholders cho các biểu đồ -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; text-align: left;">
-                        <div style="background: rgba(255, 255, 255, 0.85); border: 1px dashed #cbd5e1; padding: 2rem; border-radius: 12px; height: 350px; display: flex; align-items: center; justify-content: center; color: var(--text-gray); box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
-                            <i class="fa-solid fa-chart-line" style="font-size: 2rem; margin-right: 1rem; color: #94a3b8;"></i> Khu vực Biểu đồ Tỷ lệ GTC 7 Ngày
+                        <div style="background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; padding: 1.5rem; border-radius: 12px; height: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                            <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-dark); font-size: 1.1rem;"><i class="fa-solid fa-chart-line" style="color: var(--ghn-orange);"></i> Xu hướng GTC Tổng (7 Ngày)</h3>
+                            <div style="position: relative; height: 280px; width: 100%;">
+                                <canvas id="gtcTrendChart"></canvas>
+                            </div>
                         </div>
-                        <div style="background: rgba(255, 255, 255, 0.85); border: 1px dashed #cbd5e1; padding: 2rem; border-radius: 12px; height: 350px; display: flex; align-items: center; justify-content: center; color: var(--text-gray); box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
-                            <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; margin-right: 1rem; color: #ef4444;"></i> Cảnh báo AM có phong độ giảm sút
+                        <div style="background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; padding: 1.5rem; border-radius: 12px; height: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); overflow-y: auto;">
+                            <h3 style="margin-top: 0; margin-bottom: 1rem; color: #ef4444; font-size: 1.1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo Phong độ AM (Giảm > 2%)</h3>
+                            <div id="am-alert-list" style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                <div style="text-align: center; color: var(--text-gray); padding-top: 2rem;">Đang phân tích dữ liệu...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -983,6 +990,7 @@
             }
             
             switchTab(globalData.activeTab);
+            renderHomeAnalytics();
         }
 
         function handleDateChange(dateVal) {
@@ -994,6 +1002,134 @@
         }
 
         // --- Renderers ---
+
+        function renderHomeAnalytics() {
+            if (!globalData.gtc || !globalData.gtc.dates || globalData.gtc.dates.length === 0) return;
+            
+            // 1. Render 7-day Chart
+            // Extract last 7 days of "Grand Total" GTC
+            let dates = globalData.gtc.dates.slice(0, 7).reverse(); // Oldest to newest
+            let gtcData = [];
+            dates.forEach(d => {
+                let dayData = globalData.gtc.dataByDate[d];
+                if(dayData && dayData.grandTotal && dayData.grandTotal.total) {
+                    gtcData.push(dayData.grandTotal.total.gtc * 100);
+                } else {
+                    gtcData.push(0);
+                }
+            });
+            
+            let displayDates = dates.map(d => {
+                let parts = d.split(' - ')[0].split('-');
+                return parts[2] + '/' + parts[1]; // DD/MM
+            });
+            
+            let ctx = document.getElementById('gtcTrendChart').getContext('2d');
+            if(window.gtcChartInstance) window.gtcChartInstance.destroy();
+            window.gtcChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: displayDates,
+                    datasets: [{
+                        label: 'Tỷ lệ GTC Tổng (%)',
+                        data: gtcData,
+                        borderColor: '#f37021',
+                        backgroundColor: 'rgba(243, 112, 33, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#0284c7',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: false, title: {display: true, text: 'Tỷ lệ (%)'} }
+                    }
+                }
+            });
+
+            // 2. Lọc Cảnh báo AM
+            // Tỷ lệ GTC TB 3 ngày gần nhất vs 14 ngày trước đó
+            let allDates = globalData.gtc.dates; // Newest to oldest
+            let last3Days = allDates.slice(0, 3);
+            let prev14Days = allDates.slice(3, 17);
+            
+            let alerts = [];
+            
+            if (last3Days.length > 0 && prev14Days.length > 0) {
+                // Get list of all AMs from the most recent day
+                let latestDayData = globalData.gtc.dataByDate[allDates[0]];
+                let allAMs = Object.keys(latestDayData.amMap);
+                
+                allAMs.forEach(am => {
+                    if (am.toLowerCase() === 'grand total' || am.trim() === '') return;
+                    
+                    let sum3 = 0, count3 = 0;
+                    last3Days.forEach(d => {
+                        let amData = globalData.gtc.dataByDate[d]?.amMap[am];
+                        if (amData && amData.total && typeof amData.total.gtc === 'number') {
+                            sum3 += amData.total.gtc;
+                            count3++;
+                        }
+                    });
+                    
+                    let sum14 = 0, count14 = 0;
+                    prev14Days.forEach(d => {
+                        let amData = globalData.gtc.dataByDate[d]?.amMap[am];
+                        if (amData && amData.total && typeof amData.total.gtc === 'number') {
+                            sum14 += amData.total.gtc;
+                            count14++;
+                        }
+                    });
+                    
+                    if (count3 > 0 && count14 > 0) {
+                        let avg3 = sum3 / count3;
+                        let avg14 = sum14 / count14;
+                        let diff = avg14 - avg3; // Drop amount
+                        
+                        if (diff >= 0.02) { // 2% drop
+                            alerts.push({
+                                name: am,
+                                avg3: avg3 * 100,
+                                avg14: avg14 * 100,
+                                diff: diff * 100
+                            });
+                        }
+                    }
+                });
+                
+                alerts.sort((a,b) => b.diff - a.diff); // Sort by biggest drop
+            }
+            
+            // Render Alerts
+            let alertContainer = document.getElementById('am-alert-list');
+            if (alerts.length === 0) {
+                alertContainer.innerHTML = `<div style="text-align: center; color: #10b981; padding-top: 2rem;"><i class="fa-solid fa-circle-check" style="font-size: 2rem; margin-bottom: 1rem;"></i><br>Tuyệt vời! Không có AM nào bị sụt giảm phong độ.</div>`;
+            } else {
+                let html = '';
+                alerts.forEach(a => {
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 6px;">
+                            <div>
+                                <div style="font-weight: bold; color: #7f1d1d;">${a.name}</div>
+                                <div style="font-size: 0.85rem; color: #991b1b; margin-top: 0.2rem;">TB 14 ngày: <b>${a.avg14.toFixed(1)}%</b> → TB 3 ngày: <b>${a.avg3.toFixed(1)}%</b></div>
+                            </div>
+                            <div style="color: #ef4444; font-weight: bold; font-size: 1.1rem;">
+                                <i class="fa-solid fa-arrow-trend-down"></i> -${a.diff.toFixed(1)}%
+                            </div>
+                        </div>
+                    `;
+                });
+                alertContainer.innerHTML = html;
+            }
+        }
+
         // --- Teleram / Utils ---
         function exportTelegram() {
             let active = document.querySelector('.view-container.active').id;
