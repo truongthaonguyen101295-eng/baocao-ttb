@@ -1,0 +1,25 @@
+{
+  "bot": {
+    "name": "BOT AM Chánhpv",
+    "username": "@AMChanhpv_bot",
+    "token": "8722002259:AAGu4uz5qjR77HmekdCxJS2ZCwpDieBEfqE"
+  },
+  "sheets_url": "https://docs.google.com/spreadsheets/d/1Ckvmn5KqWxgyyvs0mOHSl0HoQOdvebIpj1LgmtlSxfw/edit?gid=0#gid=0",
+  "users": [
+    { "name": "Phan Văn Chánh", "chat_id": 5398231001, "role": "AM" },
+    { "name": "Nguyễn Trọng Ánh", "chat_id": 1955777298, "role": "AM" },
+    { "name": "Dương Ngọc Lê", "chat_id": 1230975094, "role": "AM" },
+    { "name": "Phạm Thế Vũ", "chat_id": 1628114712, "role": "AM" },
+    { "name": "Bùi Đức Dũng", "chat_id": 6754181717, "role": "AM" },
+    { "name": "Nguyễn Sỹ Tiến", "chat_id": 250642518, "role": "AM" },
+    { "name": "Trương Hữu Dũng", "chat_id": 893259420, "role": "AM" },
+    { "name": "Nguyễn Ngọc Nhân", "chat_id": 477066765, "role": "AM" },
+    { "name": "Trần Thiên Phiến", "chat_id": 586699698, "role": "AM" },
+    { "name": "Võ Thúy Nhi", "chat_id": 1321460265, "role": "AM" },
+    { "name": "Võ Nhật Hạ", "chat_id": 2098859702, "role": "AM" },
+    { "name": "Nguyễn Tấn Tài", "chat_id": 287537808, "role": "AM" },
+    { "name": "Phùng Thị Ngọc Hà", "chat_id": 779125942, "role": "AM" },
+    { "name": "Nguyễn Trọng Bách", "chat_id": 271210468, "role": "AM" },
+    { "name": "Thảo Nguyên", "chat_id": 5370345326, "role": "Assistant" }
+  ]
+}
