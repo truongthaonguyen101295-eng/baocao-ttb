@@ -444,9 +444,8 @@
             
             <ul class="nav-links">
                 <li id="nav-home" class="active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Trang Chủ</li>
-                <li id="nav-gtc" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> Báo Cáo GTC Tổng</li>
-                <li id="nav-tts" onclick="switchTab('tts')"><i class="fa-solid fa-chart-pie"></i> Báo Cáo GTC TTS</li>
-                <li id="nav-ltc-tong" onclick="switchTab('ltc-tong')"><i class="fa-solid fa-box-open"></i> Báo Cáo LTC Tổng</li>
+                <li id="nav-gtc" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> Tỷ Lệ Giao Thành Công</li>
+                                <li id="nav-ltc-tong" onclick="switchTab('ltc-tong')"><i class="fa-solid fa-box-open"></i> Báo Cáo LTC Tổng</li>
                 <li id="nav-ltc-tts" onclick="switchTab('ltc-tts')"><i class="fa-solid fa-boxes-packing"></i> Báo Cáo LTC TTS</li>
                 <li id="nav-org" onclick="switchTab('org')" style="display: none;"><i class="fa-solid fa-sitemap"></i> Cơ Cấu Tổ Chức</li>
             </ul>
@@ -996,7 +995,7 @@
         function handleDateChange(dateVal) {
             if(!dateVal) return;
             globalData.activeDate = dateVal;
-            if (['gtc', 'tts', 'ltc-tong', 'ltc-tts'].includes(globalData.activeTab)) {
+            if (['gtc', 'ltc'].includes(globalData.activeTab)) {
                 renderCurrentGTCData();
             }
         }
