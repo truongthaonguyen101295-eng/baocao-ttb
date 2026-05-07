@@ -617,7 +617,7 @@
 
 <div class="gtc-title-row" style="margin-top: 3rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fa-solid fa-chart-line" style="color: var(--ghn-blue)"></i> <span id="tts-table-title">BÁO CÁO GIAO THÀNH CÔNG - HÀNG TIKTOK SHOP</span> NGÀY <span id="gtc-date">...</span>
+                        <i class="fa-solid fa-chart-line" style="color: var(--ghn-blue)"></i> <span id="tts-table-title">BÁO CÁO GIAO THÀNH CÔNG - HÀNG TIKTOK SHOP</span> NGÀY <span id="tts-date">...</span>
                     </div>
                     <button class="btn-blue" onclick="exportTelegram('tts')" style="margin-left: 1rem; font-size: 0.85rem; padding: 0.5rem 1rem;"><i class="fa-brands fa-telegram"></i> Gửi Telegram (Hàng TTS)</button>
                 </div>
@@ -1176,23 +1176,16 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
 
-        function renderCurrentGTCData() {
-            let tab = globalData.activeTab;
-            let dataset = globalData[tab];
+                function renderTableData(tbodyId, datasetKey) {
             let activeDate = globalData.activeDate;
-            
-            document.getElementById('date-display').innerText = `Dữ liệu thực tế ngày: ${activeDate}`;
-            document.getElementById('gtc-date').innerText = activeDate;
-            document.querySelectorAll('.gtc-date-header').forEach(el => el.innerText = activeDate);
-            
-            let tbody = document.getElementById('gtc-tbody');
+            let tbody = document.getElementById(tbodyId);
+            if (!tbody) return;
             tbody.innerHTML = "";
-            
+            let dataset = globalData[datasetKey];
             if (!dataset || !dataset.loaded || !dataset.dataByDate[activeDate]) {
                 tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 2rem;">Không có dữ liệu cho ngày này.</td></tr>`;
                 return;
             }
-            
             let dayData = dataset.dataByDate[activeDate];
             let ams = dayData.ams;
             let min = dayData.minGTC;
@@ -1224,6 +1217,24 @@
 
             if(dayData.grandTotal) {
                 renderRow(dayData.grandTotal, true);
+            }
+        }
+
+        function renderCurrentGTCData() {
+            let tab = globalData.activeTab;
+            let activeDate = globalData.activeDate;
+            
+            document.getElementById('date-display').innerText = `Dữ liệu thực tế ngày: ${activeDate}`;
+            let gtcDateEl = document.getElementById('gtc-date');
+            if(gtcDateEl) gtcDateEl.innerText = activeDate;
+            document.querySelectorAll('.gtc-date-header').forEach(el => el.innerText = activeDate);
+            
+            if (tab === 'gtc') {
+                renderTableData('gtc-tbody', 'gtc');
+                renderTableData('tts-tbody', 'tts');
+            } else if (tab === 'ltc') {
+                renderTableData('gtc-tbody', 'ltc-tong');
+                renderTableData('tts-tbody', 'ltc-tts');
             }
         }
 
