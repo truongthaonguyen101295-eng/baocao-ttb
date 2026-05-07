@@ -482,8 +482,72 @@
         <div id="view-home" class="view-container active">
             <div style="background-color: var(--white); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); text-align: center; margin-bottom: 2rem; min-height: 800px; position: relative; overflow: hidden;">
                 
-                <!-- Lớp nền chìm (Watermark Map) -->
-                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('map_ttb.png?v=6') no-repeat center center; background-size: 800px; opacity: 0.15; pointer-events: none; z-index: 0;"></div>
+                <!-- Bản đồ Vùng TTB -->
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; z-index: 0; pointer-events: none; padding: 20px;">
+                    <svg viewBox="0 0 1000 1200" style="width: 100%; height: 100%;" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+    <feGaussianBlur stdDeviation="5" result="blur" />
+    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+  </filter>
+</defs>
+<style>
+  .prov { fill: #ffffff; stroke: #f37021; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; transition: all 0.3s ease; }
+  .prov:hover { fill: #fff3ed; stroke-width: 4; }
+  .prov-text { fill: #f37021; font-family: "Inter", sans-serif; font-size: 20px; font-weight: 800; pointer-events: none; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff; }
+  .wh-icon { fill: #ffffff; stroke: #f37021; stroke-width: 2.5; stroke-linejoin: round; }
+  .wh-text { fill: #f37021; font-family: "Inter", sans-serif; font-size: 13px; font-weight: 700; pointer-events: none; }
+  .road { fill: none; stroke: #f37021; stroke-width: 5; stroke-dasharray: 12, 8; stroke-linecap: round; opacity: 0.8; }
+</style>
+<g id="map-layer">
+  <path class="prov" d="M 869.7 130.6 L 852.4 111.4 L 830.2 101.2 L 815.8 100.0 L 797.5 103.9 L 796.3 127.6 L 793.0 145.5 L 785.5 161.7 L 775.4 174.9 L 771.8 185.7 L 773.0 200.1 L 759.8 217.8 L 754.7 234.2 L 754.1 248.6 L 762.5 283.1 L 764.6 301.3 L 763.4 316.9 L 759.8 331.9 L 786.4 347.8 L 801.4 351.1 L 826.3 349.9 L 841.6 352.6 L 847.6 350.2 L 849.7 331.0 L 847.3 329.5 L 859.6 301.9 L 859.6 290.0 L 864.3 277.1 L 871.2 269.9 L 875.7 254.6 L 873.6 251.3 L 884.1 232.1 L 870.3 240.5 L 872.4 232.7 L 881.4 225.8 L 887.7 210.3 L 891.0 185.7 L 900.0 175.8 L 899.7 150.0 L 892.5 149.1 L 892.8 164.4 L 888.0 178.8 L 884.1 161.1 L 889.8 153.9 L 882.9 146.4 L 885.6 136.6 L 869.7 130.6 Z" />
+  <path class="prov" d="M 759.8 331.9 L 749.3 341.5 L 738.8 373.0 L 733.7 381.9 L 715.7 388.8 L 707.9 396.6 L 699.9 411.9 L 678.9 430.2 L 685.2 438.6 L 674.1 458.7 L 676.5 466.1 L 686.7 482.3 L 697.2 489.5 L 718.4 491.6 L 756.8 505.1 L 777.2 508.4 L 781.3 492.8 L 784.3 508.4 L 790.9 515.9 L 793.6 503.9 L 803.2 495.5 L 804.1 484.7 L 818.2 476.9 L 809.5 467.9 L 811.9 434.4 L 817.3 417.3 L 832.9 382.8 L 847.9 362.8 L 851.2 349.3 L 847.6 350.2 L 841.6 352.6 L 826.3 349.9 L 801.4 351.1 L 786.4 347.8 L 759.8 331.9 Z" />
+  <path class="prov" d="M 294.5 1065.1 L 295.7 1062.1 L 281.3 1048.6 L 278.6 1040.8 L 288.8 1009.1 L 277.4 1017.2 L 264.5 1022.8 L 245.6 1024.0 L 258.5 1018.7 L 275.9 1015.4 L 266.3 1012.7 L 291.8 1004.9 L 315.4 968.9 L 319.6 958.4 L 347.2 929.1 L 399.0 891.3 L 377.2 877.5 L 367.6 865.5 L 359.2 850.9 L 344.8 846.7 L 310.9 848.8 L 299.3 844.0 L 297.5 852.7 L 291.5 847.0 L 275.3 852.4 L 268.1 864.9 L 267.5 873.3 L 257.3 882.9 L 251.0 893.4 L 251.6 904.5 L 246.2 917.1 L 241.1 918.0 L 233.0 908.4 L 225.2 911.1 L 190.2 940.7 L 167.1 967.7 L 153.3 985.4 L 141.0 995.0 L 130.0 999.8 L 110.5 1033.9 L 102.4 1041.4 L 100.0 1048.9 L 101.8 1066.9 L 118.6 1069.6 L 130.0 1078.6 L 155.7 1087.9 L 169.8 1089.4 L 182.4 1087.3 L 194.4 1079.2 L 197.7 1066.0 L 214.5 1058.5 L 237.2 1054.3 L 248.6 1055.2 L 258.8 1067.2 L 266.6 1068.4 L 294.5 1065.1 Z" />
+  <path class="prov" d="M 672.9 637.2 L 678.0 629.7 L 695.7 617.5 L 701.3 610.9 L 703.4 597.4 L 710.3 584.5 L 746.0 537.2 L 759.8 534.8 L 746.9 525.2 L 753.5 517.4 L 763.1 528.8 L 764.6 518.9 L 777.2 508.4 L 756.8 505.1 L 718.4 491.6 L 697.2 489.5 L 686.7 482.3 L 676.5 466.1 L 674.1 458.7 L 685.2 438.6 L 678.9 430.2 L 661.8 433.8 L 657.3 431.7 L 656.4 416.4 L 645.6 409.5 L 631.5 427.5 L 631.2 445.5 L 628.5 451.2 L 609.1 466.1 L 599.8 469.1 L 585.7 467.0 L 567.1 483.2 L 557.2 483.8 L 548.2 499.4 L 539.9 505.4 L 524.3 506.3 L 506.6 509.6 L 505.1 523.1 L 496.4 529.1 L 479.9 526.1 L 468.2 546.4 L 453.9 555.4 L 446.4 576.7 L 434.7 583.3 L 432.3 591.1 L 437.7 603.1 L 450.6 604.9 L 465.2 614.5 L 476.9 617.5 L 483.2 622.8 L 494.6 639.3 L 491.9 649.2 L 527.0 649.8 L 540.4 657.6 L 546.1 654.6 L 553.3 641.4 L 556.9 641.7 L 566.5 653.7 L 581.8 657.3 L 598.3 655.8 L 613.9 657.6 L 616.0 639.3 L 624.6 633.9 L 634.2 633.9 L 651.6 638.4 L 672.9 637.2 Z" />
+  <path class="prov" d="M 413.7 700.1 L 392.4 701.9 L 388.8 709.7 L 369.4 726.2 L 370.3 746.6 L 361.3 752.3 L 356.2 740.9 L 346.6 729.8 L 334.0 729.5 L 325.9 738.8 L 322.6 749.9 L 322.6 764.3 L 308.2 770.0 L 300.1 785.2 L 299.3 844.0 L 310.9 848.8 L 344.8 846.7 L 359.2 850.9 L 367.6 865.5 L 377.2 877.5 L 399.0 891.3 L 421.2 875.4 L 424.5 869.1 L 423.6 860.1 L 440.4 837.4 L 428.1 828.7 L 438.3 828.7 L 444.0 836.2 L 485.6 801.7 L 470.3 779.0 L 455.7 768.5 L 435.6 765.5 L 421.8 758.0 L 424.2 749.6 L 434.4 740.0 L 425.7 726.8 L 412.5 711.8 L 413.7 700.1 Z" />
+  <path class="prov" d="M 485.6 801.7 L 503.9 788.5 L 527.0 768.5 L 525.2 767.3 L 499.1 780.7 L 492.5 779.6 L 518.3 765.5 L 524.9 766.7 L 527.9 757.4 L 539.6 758.9 L 537.2 752.6 L 541.6 746.9 L 546.7 752.0 L 559.9 739.7 L 574.6 720.2 L 567.7 721.4 L 571.9 706.7 L 589.9 699.6 L 598.3 707.0 L 599.8 716.9 L 614.2 708.8 L 620.7 714.8 L 623.1 705.8 L 631.8 690.9 L 622.8 696.3 L 623.4 690.6 L 654.6 685.8 L 640.2 683.4 L 620.7 687.3 L 601.9 686.1 L 595.3 678.0 L 588.1 663.0 L 581.8 657.3 L 566.5 653.7 L 556.9 641.7 L 553.3 641.4 L 546.1 654.6 L 540.4 657.6 L 527.0 649.8 L 491.9 649.2 L 491.6 653.1 L 469.4 649.2 L 463.4 650.7 L 450.6 665.1 L 432.6 672.9 L 426.6 680.4 L 424.2 692.4 L 413.7 700.1 L 412.5 711.8 L 425.7 726.8 L 434.4 740.0 L 424.2 749.6 L 421.8 758.0 L 435.6 765.5 L 455.7 768.5 L 470.3 779.0 L 485.6 801.7 Z" />
+  <path class="prov" d="M 654.6 685.8 L 645.0 676.8 L 642.6 665.4 L 654.3 654.9 L 660.9 659.1 L 663.3 650.7 L 654.6 639.9 L 665.7 644.4 L 664.8 666.6 L 660.0 667.2 L 664.2 675.0 L 679.8 669.3 L 679.8 664.2 L 668.7 663.0 L 667.5 654.9 L 672.9 637.2 L 651.6 638.4 L 634.2 633.9 L 624.6 633.9 L 616.0 639.3 L 613.9 657.6 L 598.3 655.8 L 581.8 657.3 L 588.1 663.0 L 595.3 678.0 L 601.9 686.1 L 620.7 687.3 L 640.2 683.4 L 654.6 685.8 Z M 728.3 624.0 L 716.6 632.1 L 720.8 634.8 L 727.4 630.0 L 728.3 624.0 Z" />
+</g>
+<path class="road" d="M 249.5 966.7 L 392.4 795.7 L 533.6 721.6 L 655.1 655.7 L 604.7 533.6 L 762.6 423.9 L 827.0 226.3 " />
+<g id="text-layer">
+  <text class="prov-text" x="249.5" y="966.7" text-anchor="middle" dominant-baseline="middle">Quảng Bình</text>
+  <g transform="translate(0,0)">
+    <path class="wh-icon" d="M 199.5131086142322 931.6666666666667 L 209.5131086142322 921.6666666666667 L 219.5131086142322 931.6666666666667 L 229.5131086142322 921.6666666666667 L 239.5131086142322 931.6666666666667 L 239.5131086142322 951.6666666666667 L 199.5131086142322 951.6666666666667 Z" />
+    <rect class="wh-icon" x="214.5131086142322" y="939.6666666666667" width="10" height="12" />
+    <text class="wh-text" x="219.5131086142322" y="966.6666666666667" text-anchor="middle">Kho Bình</text>
+  </g>
+  <text class="prov-text" x="392.4" y="795.7" text-anchor="middle" dominant-baseline="middle">Quảng Trị</text>
+  <text class="prov-text" x="513.6" y="711.6" text-anchor="middle" dominant-baseline="middle">Thừa Thiên Huế</text>
+  <g transform="translate(0,0)">
+    <path class="wh-icon" d="M 463.55805243445695 676.5730337078652 L 473.55805243445695 666.5730337078652 L 483.55805243445695 676.5730337078652 L 493.55805243445695 666.5730337078652 L 503.55805243445695 676.5730337078652 L 503.55805243445695 696.5730337078652 L 463.55805243445695 696.5730337078652 Z" />
+    <rect class="wh-icon" x="478.55805243445695" y="684.5730337078652" width="10" height="12" />
+    <text class="wh-text" x="483.55805243445695" y="711.5730337078652" text-anchor="middle">Kho Huế</text>
+  </g>
+  <text class="prov-text" x="695.1" y="665.7" text-anchor="middle" dominant-baseline="middle">Đà Nẵng</text>
+  <g transform="translate(0,0)">
+    <path class="wh-icon" d="M 645.056179775281 630.6554307116105 L 655.056179775281 620.6554307116105 L 665.056179775281 630.6554307116105 L 675.056179775281 620.6554307116105 L 685.056179775281 630.6554307116105 L 685.056179775281 650.6554307116105 L 645.056179775281 650.6554307116105 Z" />
+    <rect class="wh-icon" x="660.056179775281" y="638.6554307116105" width="10" height="12" />
+    <text class="wh-text" x="665.056179775281" y="665.6554307116105" text-anchor="middle">Kho Nẵng</text>
+  </g>
+  <text class="prov-text" x="584.7" y="553.6" text-anchor="middle" dominant-baseline="middle">Quảng Nam</text>
+  <text class="prov-text" x="762.6" y="423.9" text-anchor="middle" dominant-baseline="middle">Quảng Ngãi</text>
+  <g transform="translate(0,0)">
+    <path class="wh-icon" d="M 712.621722846442 388.8951310861423 L 722.621722846442 378.8951310861423 L 732.621722846442 388.8951310861423 L 742.621722846442 378.8951310861423 L 752.621722846442 388.8951310861423 L 752.621722846442 408.8951310861423 L 712.621722846442 408.8951310861423 Z" />
+    <rect class="wh-icon" x="727.621722846442" y="396.8951310861423" width="10" height="12" />
+    <text class="wh-text" x="732.621722846442" y="423.8951310861423" text-anchor="middle">Kho Ngãi</text>
+  </g>
+  <text class="prov-text" x="827.0" y="226.3" text-anchor="middle" dominant-baseline="middle">Bình Định</text>
+<g transform="translate(508.55805243445695,706.5730337078652) rotate(15)">
+  <rect class="wh-icon" x="0" y="0" width="35" height="22" rx="3" />
+  <rect class="wh-icon" x="38" y="6" width="14" height="16" rx="2" />
+  <circle class="wh-icon" cx="8" cy="22" r="5" />
+  <circle class="wh-icon" cx="28" cy="22" r="5" />
+  <circle class="wh-icon" cx="45" cy="22" r="5" />
+  <line x1="10" y1="11" x2="25" y2="11" stroke="#f37021" stroke-width="2" />
+</g>
+</g>
+</svg>
+                </div>
                 
                 <!-- Lớp nội dung đè lên trên -->
                 <div style="position: relative; z-index: 1;">
@@ -595,7 +659,7 @@
             'ltc-tts': { dates: [], dataByDate: {}, loaded: false },
             org: { loaded: false, dataMap: {}, ams: [], provinces: [] },
             activeDate: "",
-            activeTab: "gtc"
+            activeTab: "home"
         };
 
         document.addEventListener('DOMContentLoaded', () => {
