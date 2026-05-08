@@ -682,12 +682,12 @@
                 </div>
                 
                 <div style="overflow-x: auto; max-height: 800px; overflow-y: auto; position: relative;">
-                    <table class="gtc-table" id="bcp-table" style="min-width: 1600px;">
+                    <table class="gtc-table" id="bcp-table" style="min-width: 1200px; font-size: 0.8rem; white-space: nowrap;">
                         <thead style="position: sticky; top: 0; z-index: 10;">
                             <tr>
-                                <th rowspan="2" class="bg-header-main" style="width: 50px; position: sticky; left: 0; z-index: 11;">STT</th>
-                                <th rowspan="2" class="bg-header-main" style="width: 150px; position: sticky; left: 50px; z-index: 11;">AM</th>
-                                <th rowspan="2" class="bg-header-main" style="width: 250px; position: sticky; left: 200px; z-index: 11;">Bưu Cục</th>
+                                <th rowspan="2" class="bg-header-main" style="width: 40px; position: sticky; left: 0; z-index: 11; font-size: 0.75rem;">STT</th>
+                                <th rowspan="2" class="bg-header-main" style="width: 120px; position: sticky; left: 40px; z-index: 11; font-size: 0.75rem;">AM</th>
+                                <th rowspan="2" class="bg-header-main" style="width: 220px; position: sticky; left: 160px; z-index: 11; font-size: 0.75rem;">Bưu Cục</th>
                                 <th colspan="3" class="bg-ca1" style="background-color: #fef08a !important; color: #854d0e !important; border-top: 3px solid #eab308 !important;">Hàng Mới Ca 1</th>
                                 <th colspan="3" class="bg-ca2" style="background-color: #bbf7d0 !important; color: #166534 !important; border-top: 3px solid #22c55e !important;">Hàng Mới Ca 2</th>
                                 <th colspan="3" class="bg-ton" style="background-color: #e0f2fe !important; color: #0284c7 !important; border-top: 3px solid #0ea5e9 !important;">Hàng Tồn</th>
@@ -1225,11 +1225,24 @@
             let dayData = globalData.bcp.dataByDate[dateStr];
             let bcs = Object.values(dayData);
             
-            // Sort by AM, then by BC
-            bcs.sort((a, b) => {
-                if(a.am !== b.am) return (a.am || "").localeCompare(b.am || "");
-                return (a.bc || "").localeCompare(b.bc || "");
+            // Separate Grand Total
+            let grandTotalBC = bcs.find(b => (b.bc || "").toLowerCase().includes("grand total"));
+            let normalBcs = bcs.filter(b => !(b.bc || "").toLowerCase().includes("grand total"));
+            
+            // Sort by Tổng GTC ASC (thấp nhất đến cao nhất)
+            normalBcs.sort((a, b) => {
+                let gtcA = a.tong && a.tong.gtc !== null ? a.tong.gtc : 9999;
+                let gtcB = b.tong && b.tong.gtc !== null ? b.tong.gtc : 9999;
+                if (gtcA !== gtcB) return gtcA - gtcB;
+                // Fallback sort by AM
+                return (a.am || "").localeCompare(b.am || "");
             });
+            
+            if (grandTotalBC) {
+                normalBcs.push(grandTotalBC);
+            }
+
+            bcs = normalBcs;
 
             let html = "";
             let stt = 1;
@@ -1250,11 +1263,14 @@
             };
 
             bcs.forEach(bc => {
+                let isGrandTotal = (bc.bc || "").toLowerCase().includes("grand total");
+                let sttDisplay = isGrandTotal ? "" : stt++;
+                let bgClass = isGrandTotal ? "background-color: #f8fafc; font-weight: bold; color: #e85d04;" : "background-color: #fff;";
                 html += `
                     <tr>
-                        <td style="position: sticky; left: 0; background-color: #fff; z-index: 5;">${stt++}</td>
-                        <td style="position: sticky; left: 50px; background-color: #fff; z-index: 5;">${bc.am || ''}</td>
-                        <td style="text-align: left; position: sticky; left: 200px; background-color: #fff; z-index: 5; font-weight: 500;">${bc.bc || ''}</td>
+                        <td style="position: sticky; left: 0; z-index: 5; ${bgClass}">${sttDisplay}</td>
+                        <td style="position: sticky; left: 40px; z-index: 5; ${bgClass}">${bc.am || ''}</td>
+                        <td style="text-align: left; position: sticky; left: 160px; z-index: 5; font-weight: 500; ${bgClass}">${bc.bc || ''}</td>
                         ${renderBlock(bc.ca1)}
                         ${renderBlock(bc.ca2)}
                         ${renderBlock(bc.ton)}
