@@ -1227,6 +1227,8 @@
             document.getElementById('date-display').innerText = `Dữ liệu thực tế ngày: ${activeDate}`;
             let gtcDateEl = document.getElementById('gtc-date');
             if(gtcDateEl) gtcDateEl.innerText = activeDate;
+            let ttsDateEl = document.getElementById('tts-date');
+            if(ttsDateEl) ttsDateEl.innerText = activeDate;
             document.querySelectorAll('.gtc-date-header').forEach(el => el.innerText = activeDate);
             
             if (tab === 'gtc') {
