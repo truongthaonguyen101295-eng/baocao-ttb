@@ -353,6 +353,8 @@
         .bg-header-main { background-color: #f8fafc; color: var(--text-gray); }
         .bg-ca1 { background-color: #f0f9ff; color: #0284c7; border-top: 3px solid #0284c7 !important; }
         .bg-ca2 { background-color: #fff5f0; color: #e85d04; border-top: 3px solid #f37021 !important; }
+        .bg-ca1-light { background-color: #e0f2fe; }
+        .bg-ca2-light { background-color: #ffedd5; }
         .bg-ton { background-color: #f0f9ff; color: #0284c7; border-top: 3px solid #0284c7 !important; }
         .bg-tong { background-color: #fff5f0; color: #e85d04; border-top: 3px solid #f37021 !important; }
         
@@ -591,76 +593,8 @@
                     </button>
                 </div>
                 <table class="gtc-table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" class="bg-header-main" style="width: 15%">Cấp Quản Lý / AM</th>
-                            <th colspan="3" class="bg-ca1">Hàng mới ca 1</th>
-                            <th colspan="3" class="bg-ca2">Hàng mới ca 2</th>
-                            <th colspan="3" class="bg-ton">Hàng tồn</th>
-                            <th colspan="3" class="bg-tong">Tổng Ngày <span class="gtc-date-header">...</span></th>
-                        </tr>
-                        <tr>
-                            <!-- Ca 1 -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
-                            <!-- Ca 2 -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
-                            <!-- Ton -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
-                            <!-- Tong -->
-                            <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong rate-header">% GTC</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gtc-tbody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-
-<div class="gtc-title-row" style="margin-top: 3rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fa-solid fa-chart-line" style="color: var(--ghn-blue)"></i> <span id="tts-table-title">BÁO CÁO GIAO THÀNH CÔNG - HÀNG TIKTOK SHOP</span> NGÀY <span id="tts-date">...</span>
-                    </div>
-                    <button class="btn-blue" onclick="exportTelegram('tts')" style="margin-left: 1rem; font-size: 0.85rem; padding: 0.5rem 1rem;"><i class="fa-brands fa-telegram"></i> Gửi Telegram (Hàng TTS)</button>
-                </div>
-                <table class="gtc-table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" class="bg-header-main" style="width: 15%">Cấp Quản Lý / AM</th>
-                            <th colspan="3" class="bg-ca1">Hàng mới ca 1</th>
-                            <th colspan="3" class="bg-ca2">Hàng mới ca 2</th>
-                            <th colspan="3" class="bg-ton">Hàng tồn</th>
-                            <th colspan="3" class="bg-tong">Tổng Ngày <span class="gtc-date-header">...</span></th>
-                        </tr>
-                        <tr>
-                            <!-- Ca 1 -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
-                            <!-- Ca 2 -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
-                            <!-- Ton -->
-                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
-                            <!-- Tong -->
-                            <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong rate-header">% GTC</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tts-tbody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-
-                <!-- ================= BẢNG 3: SO SÁNH WTD ================= -->
-                <div id="compare-table-wrapper" style="display: none;">
-                    <div class="gtc-title-row" style="margin-top: 3rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fa-solid fa-code-compare" style="color: var(--ghn-orange)"></i> <span id="compare-table-title">BÁO CÁO SO SÁNH GTC (WTD TUẦN TRƯỚC & TUẦN NÀY)</span>
-                        </div>
-                    </div>
-                    <table class="gtc-table">
-                        <thead>
-                            <tr>
-                                <th class="bg-header-main" style="width: 25%">Cấp Quản Lý / AM</th>
-                                <th class="bg-ca1" style="width: 25%">WTD Tuần Trước</th>
-                                <th class="bg-ca2" style="width: 25%">WTD Tuần Này</th>
-                                <th class="bg-tong" style="width: 25%">Chênh Lệch %</th>
-                            </tr>
+                    <thead id="compare-thead">
+                            <!-- Populated by JS -->
                         </thead>
                         <tbody id="compare-tbody">
                             <!-- Populated by JS -->
@@ -1008,32 +942,100 @@
                 let text = await res.text();
                 let parsed = Papa.parse(text, { header: false, skipEmptyLines: true });
                 let rows = parsed.data;
-                globalData.compareData = [];
-                // Find data rows
-                for(let i = 0; i < rows.length; i++) {
-                    let row = rows[i];
-                    let amName = row[1];
-                    if (amName && amName !== 'Chi tiết' && amName !== 'GTC theo AM') {
-                        let diffStr = row[row.length - 1]; // last column
-                        let wtdStr = row[row.length - 2];  // second to last
-                        if (diffStr && diffStr.includes('%')) {
-                            let diffVal = parseFloat(diffStr.replace('%', '').replace(',', '.'));
-                            let wtdVal = parseFloat(wtdStr.replace('%', '').replace(',', '.'));
-                            if (!isNaN(diffVal)) {
+                let w1Name = "", w2Name = "";
+                let w1Start = -1, w2Start = -1, wtd1Idx = -1, wtd2Idx = -1, diffIdx = -1;
+
+                let header1 = rows[1];
+                let header2 = rows[2];
+                
+                if (header1 && header2) {
+                    for (let c = 2; c < header1.length; c++) {
+                        let h1 = header1[c];
+                        if (h1 && !w1Name && h1 !== 'So sánh theo W' && h1 !== 'GTC theo AM') {
+                            w1Name = h1;
+                            w1Start = c;
+                        } else if (h1 && w1Name && !w2Name && h1 !== 'So sánh theo W' && h1 !== 'GTC theo AM') {
+                            w2Name = h1;
+                            w2Start = c;
+                        } else if (h1 === 'So sánh theo W') {
+                            diffIdx = c;
+                        }
+                    }
+
+                    if (diffIdx === -1) {
+                        // Fallback diffIdx to last column if 'So sánh theo W' not found
+                        diffIdx = header1.length - 1;
+                    }
+
+                    for (let c = w1Start; c < header2.length; c++) {
+                        if (header2[c] === 'WTD' && wtd1Idx === -1) {
+                            wtd1Idx = c;
+                        } else if (header2[c] === 'WTD' && wtd1Idx !== -1 && wtd2Idx === -1) {
+                            wtd2Idx = c;
+                        }
+                    }
+
+                    let parseDays = (start, end) => {
+                        let days = [];
+                        if(start === -1 || end === -1) return days;
+                        for(let c = start; c < end; c++) {
+                            if(header2[c] && header2[c].trim() !== '') {
+                                // Rút gọn tên ngày (VD: "2026-04-27 - Thứ 2" -> "27/04 T2")
+                                let parts = header2[c].split(' - ');
+                                let shortName = header2[c];
+                                if(parts.length === 2) {
+                                    let dParts = parts[0].split('-');
+                                    if(dParts.length === 3) {
+                                        let thu = parts[1].replace('Thứ ', 'T').replace('Chủ Nhật', 'CN');
+                                        shortName = `${dParts[2]}/${dParts[1]} ${thu}`;
+                                    }
+                                }
+                                days.push({ fullName: header2[c], shortName: shortName, idx: c });
+                            }
+                        }
+                        return days;
+                    };
+
+                    let w1Days = parseDays(w1Start, wtd1Idx);
+                    let w2Days = parseDays(w2Start, wtd2Idx);
+
+                    globalData.compareMeta = {
+                        w1Name: w1Name, w2Name: w2Name,
+                        w1Days: w1Days, w2Days: w2Days,
+                        wtd1Idx: wtd1Idx, wtd2Idx: wtd2Idx, diffIdx: diffIdx
+                    };
+
+                    globalData.compareData = [];
+                    for (let i = 3; i < rows.length; i++) {
+                        let row = rows[i];
+                        let amName = row[1];
+                        if (amName && amName !== 'Chi tiết' && amName !== 'GTC theo AM') {
+                            let parsePerc = (s) => {
+                                if(!s) return null;
+                                let p = parseFloat(s.replace('%', '').replace(',', '.'));
+                                return isNaN(p) ? null : p;
+                            };
+                            
+                            let diffVal = parsePerc(row[diffIdx]);
+                            if (diffVal !== null) {
                                 globalData.compareData.push({
                                     name: amName,
-                                    diff: diffVal,
-                                    wtd: wtdVal,
-                                    prevWtd: wtdVal - diffVal
+                                    w1Values: w1Days.map(d => parsePerc(row[d.idx])),
+                                    w2Values: w2Days.map(d => parsePerc(row[d.idx])),
+                                    wtd1: parsePerc(row[wtd1Idx]),
+                                    wtd2: parsePerc(row[wtd2Idx]),
+                                    diff: diffVal
                                 });
                             }
                         }
                     }
+                    
+                    // For Home Tab Alert compatibility
+                    globalData.compareAlerts = globalData.compareData
+                        .filter(a => a.diff < 0 && a.name !== 'Grand Total')
+                        .map(a => ({ name: a.name, diff: a.diff, wtd: a.wtd2 }))
+                        .sort((a, b) => a.diff - b.diff);
                 }
-                // Separate alerts (negative diff, excluding Grand Total)
-                globalData.compareAlerts = globalData.compareData
-                    .filter(a => a.diff < 0 && a.name !== 'Grand Total')
-                    .sort((a, b) => a.diff - b.diff);
             } catch(e) { console.error("Compare GTC failed", e); }
 
 
@@ -1250,13 +1252,53 @@
         
         function renderCompareTable() {
             let tbody = document.getElementById('compare-tbody');
+            let thead = document.getElementById('compare-thead');
+            if(!tbody || !thead) return;
+            
             tbody.innerHTML = "";
+            thead.innerHTML = "";
+            
             let data = globalData.compareData;
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem;">Không có dữ liệu so sánh.</td></tr>`;
+            let meta = globalData.compareMeta;
+            
+            if (!data || data.length === 0 || !meta) {
+                tbody.innerHTML = `<tr><td style="text-align:center; padding: 2rem;">Không có dữ liệu so sánh.</td></tr>`;
                 return;
             }
             
+            // Render Thead
+            let theadHtml = `
+                <tr>
+                    <th rowspan="2" class="bg-header-main" style="width: 15%">Cấp Quản Lý / AM</th>
+                    <th colspan="${meta.w1Days.length + 1}" class="bg-ca1">${meta.w1Name || 'Tuần Trước'}</th>
+                    <th colspan="${meta.w2Days.length + 1}" class="bg-ca2">${meta.w2Name || 'Tuần Này'}</th>
+                    <th rowspan="2" class="bg-tong">Chênh Lệch %</th>
+                </tr>
+                <tr>
+            `;
+            
+            // Days of W1
+            meta.w1Days.forEach(d => {
+                theadHtml += `<th class="sub-header" style="font-size: 0.7rem; font-weight: 500;">${d.shortName}</th>`;
+            });
+            theadHtml += `<th class="sub-header font-bold bg-ca1-light">WTD</th>`;
+            
+            // Days of W2
+            meta.w2Days.forEach(d => {
+                theadHtml += `<th class="sub-header" style="font-size: 0.7rem; font-weight: 500;">${d.shortName}</th>`;
+            });
+            theadHtml += `<th class="sub-header font-bold bg-ca2-light">WTD</th>`;
+            
+            theadHtml += `</tr>`;
+            thead.innerHTML = theadHtml;
+            
+            let renderVal = (val, isTotalRow) => {
+                if(val === null) return '-';
+                let style = '';
+                if(!isTotalRow && val < 75) style = 'color: #ef4444; font-weight: bold;';
+                return `<span style="${style}">${val.toFixed(2)}%</span>`;
+            };
+
             let html = "";
             data.forEach((am, idx) => {
                 let isTotalRow = am.name === 'Grand Total';
@@ -1269,11 +1311,24 @@
                 html += `
                     <tr class="${bgClass}">
                         <td style="font-weight: ${fontWeight};">${am.name}</td>
-                        <td style="font-weight: ${fontWeight};">${am.prevWtd.toFixed(2)}%</td>
-                        <td style="font-weight: ${fontWeight};">${am.wtd.toFixed(2)}%</td>
-                        <td style="font-weight: bold; color: ${diffColor};">${diffIcon} ${am.diff > 0 ? '+' : ''}${am.diff.toFixed(2)}%</td>
-                    </tr>
                 `;
+                
+                // W1 Days
+                am.w1Values.forEach(val => {
+                    html += `<td>${renderVal(val, isTotalRow)}</td>`;
+                });
+                html += `<td class="font-bold bg-ca1-light">${renderVal(am.wtd1, isTotalRow)}</td>`;
+                
+                // W2 Days
+                am.w2Values.forEach(val => {
+                    html += `<td>${renderVal(val, isTotalRow)}</td>`;
+                });
+                html += `<td class="font-bold bg-ca2-light">${renderVal(am.wtd2, isTotalRow)}</td>`;
+                
+                // Diff
+                html += `<td style="font-weight: bold; color: ${diffColor};">${diffIcon} ${am.diff > 0 ? '+' : ''}${am.diff.toFixed(2)}%</td>`;
+                
+                html += `</tr>`;
             });
             tbody.innerHTML = html;
         }
