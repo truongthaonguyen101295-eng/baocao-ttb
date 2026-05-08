@@ -353,8 +353,6 @@
         .bg-header-main { background-color: #f8fafc; color: var(--text-gray); }
         .bg-ca1 { background-color: #f0f9ff; color: #0284c7; border-top: 3px solid #0284c7 !important; }
         .bg-ca2 { background-color: #fff5f0; color: #e85d04; border-top: 3px solid #f37021 !important; }
-        .bg-ca1-light { background-color: #e0f2fe; }
-        .bg-ca2-light { background-color: #ffedd5; }
         .bg-ton { background-color: #f0f9ff; color: #0284c7; border-top: 3px solid #0284c7 !important; }
         .bg-tong { background-color: #fff5f0; color: #e85d04; border-top: 3px solid #f37021 !important; }
         
@@ -593,7 +591,70 @@
                     </button>
                 </div>
                 <table class="gtc-table">
-                    <thead id="compare-thead">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="bg-header-main" style="width: 15%">Cấp Quản Lý / AM</th>
+                            <th colspan="3" class="bg-ca1">Hàng mới ca 1</th>
+                            <th colspan="3" class="bg-ca2">Hàng mới ca 2</th>
+                            <th colspan="3" class="bg-ton">Hàng tồn</th>
+                            <th colspan="3" class="bg-tong">Tổng Ngày <span class="gtc-date-header">...</span></th>
+                        </tr>
+                        <tr>
+                            <!-- Ca 1 -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
+                            <!-- Ca 2 -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
+                            <!-- Ton -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
+                            <!-- Tong -->
+                            <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong rate-header">% GTC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gtc-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+
+<div class="gtc-title-row" style="margin-top: 3rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-chart-line" style="color: var(--ghn-blue)"></i> <span id="tts-table-title">BÁO CÁO GIAO THÀNH CÔNG - HÀNG TIKTOK SHOP</span> NGÀY <span id="tts-date">...</span>
+                    </div>
+                    <button class="btn-blue" onclick="exportTelegram('tts')" style="margin-left: 1rem; font-size: 0.85rem; padding: 0.5rem 1rem;"><i class="fa-brands fa-telegram"></i> Gửi Telegram (Hàng TTS)</button>
+                </div>
+                <table class="gtc-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="bg-header-main" style="width: 15%">Cấp Quản Lý / AM</th>
+                            <th colspan="3" class="bg-ca1">Hàng mới ca 1</th>
+                            <th colspan="3" class="bg-ca2">Hàng mới ca 2</th>
+                            <th colspan="3" class="bg-ton">Hàng tồn</th>
+                            <th colspan="3" class="bg-tong">Tổng Ngày <span class="gtc-date-header">...</span></th>
+                        </tr>
+                        <tr>
+                            <!-- Ca 1 -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
+                            <!-- Ca 2 -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
+                            <!-- Ton -->
+                            <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header rate-header">% GTC</th>
+                            <!-- Tong -->
+                            <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong rate-header">% GTC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tts-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+
+                <!-- ================= BẢNG 3: SO SÁNH WTD ================= -->
+                <div id="compare-table-wrapper" style="display: none;">
+                    <div class="gtc-title-row" style="margin-top: 3rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-code-compare" style="color: var(--ghn-orange)"></i> <span id="compare-table-title">BÁO CÁO SO SÁNH GTC (WTD TUẦN TRƯỚC & TUẦN NÀY)</span>
+                        </div>
+                    </div>
+                    <table class="gtc-table">
+                        <thead id="compare-thead">
                             <!-- Populated by JS -->
                         </thead>
                         <tbody id="compare-tbody">
