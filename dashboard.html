@@ -81,6 +81,7 @@
             border-radius: 8px;
             transition: all 0.3s ease;
             width: 100%;
+            white-space: nowrap;
         }
 
         .nav-links li i { font-size: 1.2rem; width: 24px; text-align: center; }
@@ -426,6 +427,7 @@
         .hidden { display: none !important; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 </head>
 <body>
 
@@ -443,10 +445,10 @@
             </div>
             
             <ul class="nav-links">
-                <li id="nav-home" class="active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> Trang Chủ</li>
-                <li id="nav-gtc" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> Tỷ Lệ Giao Thành Công</li>
-                                <li id="nav-ltc" onclick="switchTab('ltc')"><i class="fa-solid fa-truck-fast"></i> Tỷ Lệ Lấy Thành Công</li>
-                                <li id="nav-org" onclick="switchTab('org')" style="display: none;"><i class="fa-solid fa-sitemap"></i> Cơ Cấu Tổ Chức</li>
+                <li id="nav-home" class="active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> <span style="white-space: nowrap;">Trang Chủ</span></li>
+                <li id="nav-gtc" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> <span style="white-space: nowrap;">Tỷ Lệ Giao Thành Công</span></li>
+                <li id="nav-ltc" onclick="switchTab('ltc')"><i class="fa-solid fa-truck-fast"></i> <span style="white-space: nowrap;">Tỷ Lệ Lấy Thành Công</span></li>
+                <li id="nav-org" onclick="switchTab('org')" style="display: none;"><i class="fa-solid fa-sitemap"></i> <span style="white-space: nowrap;">Cơ Cấu Tổ Chức</span></li>
             </ul>
 
             <div class="nav-actions">
@@ -1003,99 +1005,24 @@
                 let text = await res.text();
                 let parsed = Papa.parse(text, { header: false, skipEmptyLines: true });
                 let rows = parsed.data;
-                let w1Name = "", w2Name = "";
-                let w1Start = -1, w2Start = -1, wtd1Idx = -1, wtd2Idx = -1, diffIdx = -1;
-
-                let header1 = rows[1];
-                let header2 = rows[2];
                 
-                if (header1 && header2) {
-                    for (let c = 2; c < header1.length; c++) {
-                        let h1 = header1[c];
-                        if (h1 && !w1Name && h1 !== 'So sánh theo W' && h1 !== 'GTC theo AM') {
-                            w1Name = h1;
-                            w1Start = c;
-                        } else if (h1 && w1Name && !w2Name && h1 !== 'So sánh theo W' && h1 !== 'GTC theo AM') {
-                            w2Name = h1;
-                            w2Start = c;
-                        } else if (h1 === 'So sánh theo W') {
-                            diffIdx = c;
+                globalData.weeklyData = {};
+                for (let i = 1; i < rows.length; i++) {
+                    let row = rows[i];
+                    let amName = row[1];
+                    let weekStr = row[2];
+                    let gtcStr = row[5];
+                    if (amName && amName !== 'Chi tiết' && weekStr && gtcStr) {
+                        if (!globalData.weeklyData[amName]) {
+                            globalData.weeklyData[amName] = {};
                         }
+                        let parsePerc = (s) => {
+                            if(!s) return null;
+                            let p = parseFloat(s.replace('%', '').replace(',', '.'));
+                            return isNaN(p) ? null : p;
+                        };
+                        globalData.weeklyData[amName][weekStr] = parsePerc(gtcStr);
                     }
-
-                    if (diffIdx === -1) {
-                        // Fallback diffIdx to last column if 'So sánh theo W' not found
-                        diffIdx = header1.length - 1;
-                    }
-
-                    for (let c = w1Start; c < header2.length; c++) {
-                        if (header2[c] === 'WTD' && wtd1Idx === -1) {
-                            wtd1Idx = c;
-                        } else if (header2[c] === 'WTD' && wtd1Idx !== -1 && wtd2Idx === -1) {
-                            wtd2Idx = c;
-                        }
-                    }
-
-                    let parseDays = (start, end) => {
-                        let days = [];
-                        if(start === -1 || end === -1) return days;
-                        for(let c = start; c < end; c++) {
-                            if(header2[c] && header2[c].trim() !== '') {
-                                // Rút gọn tên ngày (VD: "2026-04-27 - Thứ 2" -> "27/04 T2")
-                                let parts = header2[c].split(' - ');
-                                let shortName = header2[c];
-                                if(parts.length === 2) {
-                                    let dParts = parts[0].split('-');
-                                    if(dParts.length === 3) {
-                                        let thu = parts[1].replace('Thứ ', 'T').replace('Chủ Nhật', 'CN');
-                                        shortName = `${dParts[2]}/${dParts[1]} ${thu}`;
-                                    }
-                                }
-                                days.push({ fullName: header2[c], shortName: shortName, idx: c });
-                            }
-                        }
-                        return days;
-                    };
-
-                    let w1Days = parseDays(w1Start, wtd1Idx);
-                    let w2Days = parseDays(w2Start, wtd2Idx);
-
-                    globalData.compareMeta = {
-                        w1Name: w1Name, w2Name: w2Name,
-                        w1Days: w1Days, w2Days: w2Days,
-                        wtd1Idx: wtd1Idx, wtd2Idx: wtd2Idx, diffIdx: diffIdx
-                    };
-
-                    globalData.compareData = [];
-                    for (let i = 3; i < rows.length; i++) {
-                        let row = rows[i];
-                        let amName = row[1];
-                        if (amName && amName !== 'Chi tiết' && amName !== 'GTC theo AM') {
-                            let parsePerc = (s) => {
-                                if(!s) return null;
-                                let p = parseFloat(s.replace('%', '').replace(',', '.'));
-                                return isNaN(p) ? null : p;
-                            };
-                            
-                            let diffVal = parsePerc(row[diffIdx]);
-                            if (diffVal !== null) {
-                                globalData.compareData.push({
-                                    name: amName,
-                                    w1Values: w1Days.map(d => parsePerc(row[d.idx])),
-                                    w2Values: w2Days.map(d => parsePerc(row[d.idx])),
-                                    wtd1: parsePerc(row[wtd1Idx]),
-                                    wtd2: parsePerc(row[wtd2Idx]),
-                                    diff: diffVal
-                                });
-                            }
-                        }
-                    }
-                    
-                    // For Home Tab Alert compatibility
-                    globalData.compareAlerts = globalData.compareData
-                        .filter(a => a.diff < 0 && a.name !== 'Grand Total')
-                        .map(a => ({ name: a.name, diff: a.diff, wtd: a.wtd2 }))
-                        .sort((a, b) => a.diff - b.diff);
                 }
             } catch(e) { console.error("Compare GTC failed", e); }
 
@@ -1175,6 +1102,7 @@
             if(window.gtcChartInstance) window.gtcChartInstance.destroy();
             window.gtcChartInstance = new Chart(ctx, {
                 type: 'line',
+                plugins: [ChartDataLabels],
                 data: {
                     labels: displayDates,
                     datasets: [{
@@ -1194,7 +1122,17 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: {
+                            align: 'top',
+                            color: '#1e3a8a',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: function(value) {
+                                return value.toFixed(2);
+                            }
+                        }
+                    },
                     scales: {
                         y: { beginAtZero: false, title: {display: true, text: 'Tỷ lệ (%)'} }
                     }
@@ -1311,6 +1249,23 @@
         }
 
         
+        function getISOWeek(dateStr) {
+            let parts = dateStr.split(' - ')[0].split('-');
+            if (parts.length !== 3) return "";
+            let d = new Date(Date.UTC(parts[0], parts[1]-1, parts[2]));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            let yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            let weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+            return d.getUTCFullYear() + "/" + weekNo.toString().padStart(2, '0');
+        }
+
+        function getMonday(d) {
+            d = new Date(d);
+            var day = d.getDay(),
+                diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+            return new Date(d.setDate(diff));
+        }
+
         function renderCompareTable() {
             let tbody = document.getElementById('compare-tbody');
             let thead = document.getElementById('compare-thead');
@@ -1319,79 +1274,228 @@
             tbody.innerHTML = "";
             thead.innerHTML = "";
             
-            let data = globalData.compareData;
-            let meta = globalData.compareMeta;
-            
-            if (!data || data.length === 0 || !meta) {
-                tbody.innerHTML = `<tr><td style="text-align:center; padding: 2rem;">Không có dữ liệu so sánh.</td></tr>`;
+            let activeDateStr = globalData.activeDate;
+            if (!activeDateStr || !globalData.gtc || !globalData.gtc.dataByDate) {
+                tbody.innerHTML = `<tr><td style="text-align:center; padding: 2rem;">Chưa có dữ liệu.</td></tr>`;
                 return;
             }
-            
+
+            let parts = activeDateStr.split(' - ')[0].split('-');
+            if (parts.length !== 3) return;
+            let activeDateObj = new Date(parts[0], parts[1]-1, parts[2]);
+
+            // Calculate Week 2 dates (Monday to Sunday)
+            let w2Mon = getMonday(activeDateObj);
+            let w2Days = [];
+            for (let i = 0; i < 7; i++) {
+                let d = new Date(w2Mon);
+                d.setDate(w2Mon.getDate() + i);
+                let y = d.getFullYear();
+                let m = (d.getMonth() + 1).toString().padStart(2, '0');
+                let day = d.getDate().toString().padStart(2, '0');
+                let dayName = d.getDay() === 0 ? "Chủ Nhật" : "Thứ " + (d.getDay() + 1);
+                w2Days.push(`${y}-${m}-${day} - ${dayName}`);
+            }
+
+            // Calculate Week 1 dates
+            let w1Days = w2Days.map(dStr => {
+                let p = dStr.split(' - ')[0].split('-');
+                let d = new Date(p[0], p[1]-1, p[2]);
+                d.setDate(d.getDate() - 7);
+                let y = d.getFullYear();
+                let m = (d.getMonth() + 1).toString().padStart(2, '0');
+                let day = d.getDate().toString().padStart(2, '0');
+                let dayName = d.getDay() === 0 ? "Chủ Nhật" : "Thứ " + (d.getDay() + 1);
+                return `${y}-${m}-${day} - ${dayName}`;
+            });
+
+            let activeW2Str = activeDateStr;
+            let activeW1Str = w1Days[w2Days.indexOf(activeDateStr)];
+
+            let w2WeekCode = getISOWeek(w2Days[0]);
+            let w1WeekCode = getISOWeek(w1Days[0]);
+
+            let activeDayName = activeDateStr.split(' - ')[1] || 'Ngày';
+
             // Render Thead
             let theadHtml = `
                 <tr>
                     <th rowspan="2" class="bg-header-main" style="width: 15%">Cấp Quản Lý / AM</th>
-                    <th colspan="${meta.w1Days.length + 1}" class="bg-ca1">${meta.w1Name || 'Tuần Trước'}</th>
-                    <th colspan="${meta.w2Days.length + 1}" class="bg-ca2">${meta.w2Name || 'Tuần Này'}</th>
-                    <th rowspan="2" class="bg-tong">Chênh Lệch %</th>
+                    <th colspan="8" class="bg-ca1">Tuần Trước (${w1WeekCode})</th>
+                    <th colspan="8" class="bg-ca2">Tuần Này (${w2WeekCode})</th>
+                    <th rowspan="2" class="bg-tong">Chênh Lệch (${activeDayName})</th>
                 </tr>
                 <tr>
             `;
             
+            let shortDate = (dStr) => {
+                let parts = dStr.split(' - ');
+                let dp = parts[0].split('-');
+                let thu = parts[1].replace('Thứ ', 'T').replace('Chủ Nhật', 'CN');
+                return `${dp[2]}/${dp[1]} ${thu}`;
+            };
+
             // Days of W1
-            meta.w1Days.forEach(d => {
-                theadHtml += `<th class="sub-header" style="font-size: 0.7rem; font-weight: 500;">${d.shortName}</th>`;
+            w1Days.forEach(d => {
+                theadHtml += `<th class="sub-header" style="font-size: 0.7rem; font-weight: 500;">${shortDate(d)}</th>`;
             });
-            theadHtml += `<th class="sub-header font-bold bg-ca1-light">WTD</th>`;
+            theadHtml += `<th class="sub-header font-bold bg-ca1-light">Tổng Tuần</th>`;
             
             // Days of W2
-            meta.w2Days.forEach(d => {
-                theadHtml += `<th class="sub-header" style="font-size: 0.7rem; font-weight: 500;">${d.shortName}</th>`;
+            w2Days.forEach(d => {
+                theadHtml += `<th class="sub-header" style="font-size: 0.7rem; font-weight: 500;">${shortDate(d)}</th>`;
             });
-            theadHtml += `<th class="sub-header font-bold bg-ca2-light">WTD</th>`;
+            theadHtml += `<th class="sub-header font-bold bg-ca2-light">Tổng Tuần</th>`;
             
             theadHtml += `</tr>`;
             thead.innerHTML = theadHtml;
             
             let renderVal = (val, isTotalRow) => {
-                if(val === null) return '-';
+                if(val === null || val === undefined) return '-';
                 let style = '';
-                if(!isTotalRow && val < 75) style = 'color: #ef4444; font-weight: bold;';
-                return `<span style="${style}">${val.toFixed(2)}%</span>`;
+                if(!isTotalRow && val < 0.75) style = 'color: #ef4444; font-weight: bold;';
+                return `<span style="${style}">${(val * 100).toFixed(2)}%</span>`;
             };
 
+            // Get unique AMs from globalData.weeklyData and globalData.gtc.dataByDate
+            let amSet = new Set();
+            if (globalData.weeklyData) {
+                Object.keys(globalData.weeklyData).forEach(am => {
+                    if (am !== "Grand Total") amSet.add(am);
+                });
+            }
+
             let html = "";
-            data.forEach((am, idx) => {
-                let isTotalRow = am.name === 'Grand Total';
-                let bgClass = isTotalRow ? 'bg-total-row' : (idx % 2 === 0 ? '' : 'bg-gray');
+            let ams = Array.from(amSet).sort();
+
+            let getGtcForDay = (amName, dateStr) => {
+                let d = globalData.gtc.dataByDate[dateStr];
+                if (d && d.amMap && d.amMap[amName] && d.amMap[amName].total) {
+                    return d.amMap[amName].total.gtc;
+                }
+                return null;
+            };
+
+            let compareAlerts = [];
+
+            let renderAmRow = (amName, isTotalRow) => {
+                let bgClass = isTotalRow ? 'bg-total-row' : '';
                 let fontWeight = isTotalRow ? 'bold' : 'normal';
                 
-                let diffColor = am.diff > 0 ? 'var(--ghn-blue)' : (am.diff < 0 ? '#ef4444' : 'inherit');
-                let diffIcon = am.diff > 0 ? '<i class="fa-solid fa-arrow-trend-up"></i>' : (am.diff < 0 ? '<i class="fa-solid fa-arrow-trend-down"></i>' : '-');
+                let w1Vals = w1Days.map(d => getGtcForDay(amName, d));
+                let w2Vals = w2Days.map(d => getGtcForDay(amName, d));
                 
-                html += `
+                let w1Total = globalData.weeklyData && globalData.weeklyData[amName] ? globalData.weeklyData[amName][w1WeekCode] : null;
+                let w2Total = globalData.weeklyData && globalData.weeklyData[amName] ? globalData.weeklyData[amName][w2WeekCode] : null;
+
+                // For diff, we compare the active date (w2) with corresponding date in w1
+                let activeW2Val = getGtcForDay(amName, activeW2Str);
+                let activeW1Val = getGtcForDay(amName, activeW1Str);
+                let diff = null;
+                if (activeW2Val !== null && activeW1Val !== null) {
+                    diff = activeW2Val - activeW1Val;
+                }
+                
+                if (!isTotalRow && diff !== null) {
+                    compareAlerts.push({ name: amName, diff: diff * 100, wtd: activeW2Val * 100 });
+                }
+
+                let diffColor = 'inherit';
+                let diffIcon = '-';
+                let diffText = '-';
+                if (diff !== null) {
+                    diffColor = diff > 0 ? 'var(--ghn-blue)' : (diff < 0 ? '#ef4444' : 'inherit');
+                    diffIcon = diff > 0 ? '<i class="fa-solid fa-arrow-trend-up"></i>' : (diff < 0 ? '<i class="fa-solid fa-arrow-trend-down"></i>' : '-');
+                    diffText = `${diff > 0 ? '+' : ''}${(diff * 100).toFixed(2)}%`;
+                }
+
+                let rowHtml = `
                     <tr class="${bgClass}">
-                        <td style="font-weight: ${fontWeight};">${am.name}</td>
+                        <td style="font-weight: ${fontWeight};">${amName}</td>
                 `;
                 
                 // W1 Days
-                am.w1Values.forEach(val => {
-                    html += `<td>${renderVal(val, isTotalRow)}</td>`;
+                w1Vals.forEach(val => {
+                    rowHtml += `<td>${renderVal(val, isTotalRow)}</td>`;
                 });
-                html += `<td class="font-bold bg-ca1-light">${renderVal(am.wtd1, isTotalRow)}</td>`;
+                // Note: weeklyData has values like 75.5 for 75.5%, so we divide by 100 to pass to renderVal
+                rowHtml += `<td class="font-bold bg-ca1-light">${renderVal(w1Total !== null ? w1Total/100 : null, isTotalRow)}</td>`;
                 
                 // W2 Days
-                am.w2Values.forEach(val => {
-                    html += `<td>${renderVal(val, isTotalRow)}</td>`;
+                w2Vals.forEach(val => {
+                    rowHtml += `<td>${renderVal(val, isTotalRow)}</td>`;
                 });
-                html += `<td class="font-bold bg-ca2-light">${renderVal(am.wtd2, isTotalRow)}</td>`;
+                rowHtml += `<td class="font-bold bg-ca2-light">${renderVal(w2Total !== null ? w2Total/100 : null, isTotalRow)}</td>`;
                 
                 // Diff
-                html += `<td style="font-weight: bold; color: ${diffColor};">${diffIcon} ${am.diff > 0 ? '+' : ''}${am.diff.toFixed(2)}%</td>`;
+                rowHtml += `<td style="font-weight: bold; color: ${diffColor};">${diffIcon} ${diffText}</td>`;
                 
-                html += `</tr>`;
+                rowHtml += `</tr>`;
+                return rowHtml;
+            };
+
+            ams.forEach(am => {
+                html += renderAmRow(am, false);
             });
+
+            // Handle Grand Total
+            let getGrandTotalForDay = (dateStr) => {
+                let d = globalData.gtc.dataByDate[dateStr];
+                if (d && d.grandTotal && d.grandTotal.total) {
+                    return d.grandTotal.total.gtc;
+                }
+                return null;
+            };
+
+            let renderGrandTotalRow = () => {
+                let w1Vals = w1Days.map(d => getGrandTotalForDay(d));
+                let w2Vals = w2Days.map(d => getGrandTotalForDay(d));
+                
+                let activeW2Val = getGrandTotalForDay(activeW2Str);
+                let activeW1Val = getGrandTotalForDay(activeW1Str);
+                let diff = null;
+                if (activeW2Val !== null && activeW1Val !== null) {
+                    diff = activeW2Val - activeW1Val;
+                }
+                
+                let diffColor = 'inherit';
+                let diffIcon = '-';
+                let diffText = '-';
+                if (diff !== null) {
+                    diffColor = diff > 0 ? 'var(--ghn-blue)' : (diff < 0 ? '#ef4444' : 'inherit');
+                    diffIcon = diff > 0 ? '<i class="fa-solid fa-arrow-trend-up"></i>' : (diff < 0 ? '<i class="fa-solid fa-arrow-trend-down"></i>' : '-');
+                    diffText = `${diff > 0 ? '+' : ''}${(diff * 100).toFixed(2)}%`;
+                }
+
+                let rowHtml = `
+                    <tr class="bg-total-row">
+                        <td style="font-weight: bold;">Tổng Vùng</td>
+                `;
+                
+                w1Vals.forEach(val => {
+                    rowHtml += `<td>${renderVal(val, true)}</td>`;
+                });
+                rowHtml += `<td class="font-bold bg-ca1-light">-</td>`; // Tổng tuần currently null for Grand Total as we don't have it easily
+                
+                w2Vals.forEach(val => {
+                    rowHtml += `<td>${renderVal(val, true)}</td>`;
+                });
+                rowHtml += `<td class="font-bold bg-ca2-light">-</td>`;
+                
+                rowHtml += `<td style="font-weight: bold; color: ${diffColor};">${diffIcon} ${diffText}</td>`;
+                
+                rowHtml += `</tr>`;
+                return rowHtml;
+            };
+
+            html += renderGrandTotalRow();
+
             tbody.innerHTML = html;
+
+            // For Home Tab Alert compatibility
+            globalData.compareAlerts = compareAlerts
+                .filter(a => a.diff < 0)
+                .sort((a, b) => a.diff - b.diff);
         }
 
         function renderCurrentGTCData() {
