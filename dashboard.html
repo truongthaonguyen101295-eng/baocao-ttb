@@ -645,6 +645,29 @@
                         <!-- Populated by JS -->
                     </tbody>
                 </table>
+
+                <!-- ================= BẢNG 3: SO SÁNH WTD ================= -->
+                <div id="compare-table-wrapper" style="display: none;">
+                    <div class="gtc-title-row" style="margin-top: 3rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-code-compare" style="color: var(--ghn-orange)"></i> <span id="compare-table-title">BÁO CÁO SO SÁNH GTC (WTD TUẦN TRƯỚC & TUẦN NÀY)</span>
+                        </div>
+                    </div>
+                    <table class="gtc-table">
+                        <thead>
+                            <tr>
+                                <th class="bg-header-main" style="width: 25%">Cấp Quản Lý / AM</th>
+                                <th class="bg-ca1" style="width: 25%">WTD Tuần Trước</th>
+                                <th class="bg-ca2" style="width: 25%">WTD Tuần Này</th>
+                                <th class="bg-tong" style="width: 25%">Chênh Lệch %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compare-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
 
@@ -985,28 +1008,32 @@
                 let text = await res.text();
                 let parsed = Papa.parse(text, { header: false, skipEmptyLines: true });
                 let rows = parsed.data;
-                globalData.compareAlerts = [];
+                globalData.compareData = [];
                 // Find data rows
                 for(let i = 0; i < rows.length; i++) {
                     let row = rows[i];
                     let amName = row[1];
-                    if (amName && amName !== 'Chi tiết' && amName !== 'GTC theo AM' && amName !== 'Grand Total') {
+                    if (amName && amName !== 'Chi tiết' && amName !== 'GTC theo AM') {
                         let diffStr = row[row.length - 1]; // last column
                         let wtdStr = row[row.length - 2];  // second to last
                         if (diffStr && diffStr.includes('%')) {
                             let diffVal = parseFloat(diffStr.replace('%', '').replace(',', '.'));
                             let wtdVal = parseFloat(wtdStr.replace('%', '').replace(',', '.'));
-                            if (!isNaN(diffVal) && diffVal < 0) {
-                                globalData.compareAlerts.push({
+                            if (!isNaN(diffVal)) {
+                                globalData.compareData.push({
                                     name: amName,
                                     diff: diffVal,
-                                    wtd: wtdVal
+                                    wtd: wtdVal,
+                                    prevWtd: wtdVal - diffVal
                                 });
                             }
                         }
                     }
                 }
-                globalData.compareAlerts.sort((a, b) => a.diff - b.diff); // Most negative first
+                // Separate alerts (negative diff, excluding Grand Total)
+                globalData.compareAlerts = globalData.compareData
+                    .filter(a => a.diff < 0 && a.name !== 'Grand Total')
+                    .sort((a, b) => a.diff - b.diff);
             } catch(e) { console.error("Compare GTC failed", e); }
 
 
@@ -1220,6 +1247,37 @@
             }
         }
 
+        
+        function renderCompareTable() {
+            let tbody = document.getElementById('compare-tbody');
+            tbody.innerHTML = "";
+            let data = globalData.compareData;
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 2rem;">Không có dữ liệu so sánh.</td></tr>`;
+                return;
+            }
+            
+            let html = "";
+            data.forEach((am, idx) => {
+                let isTotalRow = am.name === 'Grand Total';
+                let bgClass = isTotalRow ? 'bg-total-row' : (idx % 2 === 0 ? '' : 'bg-gray');
+                let fontWeight = isTotalRow ? 'bold' : 'normal';
+                
+                let diffColor = am.diff > 0 ? 'var(--ghn-blue)' : (am.diff < 0 ? '#ef4444' : 'inherit');
+                let diffIcon = am.diff > 0 ? '<i class="fa-solid fa-arrow-trend-up"></i>' : (am.diff < 0 ? '<i class="fa-solid fa-arrow-trend-down"></i>' : '-');
+                
+                html += `
+                    <tr class="${bgClass}">
+                        <td style="font-weight: ${fontWeight};">${am.name}</td>
+                        <td style="font-weight: ${fontWeight};">${am.prevWtd.toFixed(2)}%</td>
+                        <td style="font-weight: ${fontWeight};">${am.wtd.toFixed(2)}%</td>
+                        <td style="font-weight: bold; color: ${diffColor};">${diffIcon} ${am.diff > 0 ? '+' : ''}${am.diff.toFixed(2)}%</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
         function renderCurrentGTCData() {
             let tab = globalData.activeTab;
             let activeDate = globalData.activeDate;
@@ -1234,9 +1292,12 @@
             if (tab === 'gtc') {
                 renderTableData('gtc-tbody', 'gtc');
                 renderTableData('tts-tbody', 'tts');
+                document.getElementById('compare-table-wrapper').style.display = 'block';
+                renderCompareTable();
             } else if (tab === 'ltc') {
                 renderTableData('gtc-tbody', 'ltc-tong');
                 renderTableData('tts-tbody', 'ltc-tts');
+                document.getElementById('compare-table-wrapper').style.display = 'none';
             }
         }
 
