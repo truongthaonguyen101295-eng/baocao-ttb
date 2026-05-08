@@ -1472,15 +1472,18 @@
                         <td style="font-weight: bold;">Tổng Vùng</td>
                 `;
                 
+                let gtTotalW1 = globalData.weeklyData && globalData.weeklyData['Grand Total'] ? globalData.weeklyData['Grand Total'][w1WeekCode] : null;
+                let gtTotalW2 = globalData.weeklyData && globalData.weeklyData['Grand Total'] ? globalData.weeklyData['Grand Total'][w2WeekCode] : null;
+
                 w1Vals.forEach(val => {
                     rowHtml += `<td>${renderVal(val, true)}</td>`;
                 });
-                rowHtml += `<td class="font-bold bg-ca1-light">-</td>`; // Tổng tuần currently null for Grand Total as we don't have it easily
+                rowHtml += `<td class="font-bold bg-ca1-light">${renderVal(gtTotalW1 !== null ? gtTotalW1 / 100 : null, true)}</td>`;
                 
                 w2Vals.forEach(val => {
                     rowHtml += `<td>${renderVal(val, true)}</td>`;
                 });
-                rowHtml += `<td class="font-bold bg-ca2-light">-</td>`;
+                rowHtml += `<td class="font-bold bg-ca2-light">${renderVal(gtTotalW2 !== null ? gtTotalW2 / 100 : null, true)}</td>`;
                 
                 rowHtml += `<td style="font-weight: bold; color: ${diffColor};">${diffIcon} ${diffText}</td>`;
                 
