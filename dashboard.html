@@ -356,6 +356,8 @@
         .bg-ca2 { background-color: #fff5f0; color: #e85d04; border-top: 3px solid #f37021 !important; }
         .bg-ton { background-color: #f0f9ff; color: #0284c7; border-top: 3px solid #0284c7 !important; }
         .bg-tong { background-color: #fff5f0; color: #e85d04; border-top: 3px solid #f37021 !important; }
+        .bg-ca1-light { background-color: #f8fcff; }
+        .bg-ca2-light { background-color: #fffaf7; }
         
         .sub-header { background-color: #fcfcfc; color: var(--text-gray); }
         .sub-tong { background-color: #fff0e6; color: #e85d04; font-weight: 800 !important; }
@@ -1332,20 +1334,20 @@
                 let parts = dStr.split(' - ');
                 let dp = parts[0].split('-');
                 let thu = parts[1].replace('Thứ ', 'T').replace('Chủ Nhật', 'CN');
-                return `${dp[2]}/${dp[1]} ${thu}`;
+                return `${dp[2]}/${dp[1]}<br/>${thu}`;
             };
 
             // Days of W1
             w1Days.forEach(d => {
-                theadHtml += `<th class="sub-header" style="font-size: 0.7rem; font-weight: 500;">${shortDate(d)}</th>`;
+                theadHtml += `<th class="sub-header bg-ca1-light" style="font-size: 0.85rem; font-weight: bold; padding: 0.6rem 0.2rem; line-height: 1.3;">${shortDate(d)}</th>`;
             });
-            theadHtml += `<th class="sub-header font-bold bg-ca1-light">Tổng Tuần</th>`;
+            theadHtml += `<th class="sub-header font-bold bg-ca1-light" style="font-size: 0.85rem; font-weight: bold; padding: 0.6rem 0.2rem; line-height: 1.3;">Tổng<br/>Tuần</th>`;
             
             // Days of W2
             w2Days.forEach(d => {
-                theadHtml += `<th class="sub-header" style="font-size: 0.7rem; font-weight: 500;">${shortDate(d)}</th>`;
+                theadHtml += `<th class="sub-header bg-ca2-light" style="font-size: 0.85rem; font-weight: bold; padding: 0.6rem 0.2rem; line-height: 1.3;">${shortDate(d)}</th>`;
             });
-            theadHtml += `<th class="sub-header font-bold bg-ca2-light">Tổng Tuần</th>`;
+            theadHtml += `<th class="sub-header font-bold bg-ca2-light" style="font-size: 0.85rem; font-weight: bold; padding: 0.6rem 0.2rem; line-height: 1.3;">Tổng<br/>Tuần</th>`;
             
             theadHtml += `</tr>`;
             thead.innerHTML = theadHtml;
@@ -1411,19 +1413,19 @@
 
                 let rowHtml = `
                     <tr class="${bgClass}">
-                        <td style="font-weight: ${fontWeight};">${amName}</td>
+                        <td style="font-weight: bold; color: var(--ghn-blue);">${amName}</td>
                 `;
                 
                 // W1 Days
                 w1Vals.forEach(val => {
-                    rowHtml += `<td>${renderVal(val, isTotalRow)}</td>`;
+                    rowHtml += `<td class="bg-ca1-light">${renderVal(val, isTotalRow)}</td>`;
                 });
                 // Note: weeklyData has values like 75.5 for 75.5%, so we divide by 100 to pass to renderVal
                 rowHtml += `<td class="font-bold bg-ca1-light">${renderVal(w1Total !== null ? w1Total/100 : null, isTotalRow)}</td>`;
                 
                 // W2 Days
                 w2Vals.forEach(val => {
-                    rowHtml += `<td>${renderVal(val, isTotalRow)}</td>`;
+                    rowHtml += `<td class="bg-ca2-light">${renderVal(val, isTotalRow)}</td>`;
                 });
                 rowHtml += `<td class="font-bold bg-ca2-light">${renderVal(w2Total !== null ? w2Total/100 : null, isTotalRow)}</td>`;
                 
@@ -1469,19 +1471,19 @@
 
                 let rowHtml = `
                     <tr class="bg-total-row">
-                        <td style="font-weight: bold;">Tổng Vùng</td>
+                        <td style="font-weight: bold; color: #e85d04;">Tổng Vùng</td>
                 `;
                 
                 let gtTotalW1 = globalData.weeklyData && globalData.weeklyData['Grand Total'] ? globalData.weeklyData['Grand Total'][w1WeekCode] : null;
                 let gtTotalW2 = globalData.weeklyData && globalData.weeklyData['Grand Total'] ? globalData.weeklyData['Grand Total'][w2WeekCode] : null;
 
                 w1Vals.forEach(val => {
-                    rowHtml += `<td>${renderVal(val, true)}</td>`;
+                    rowHtml += `<td class="bg-ca1-light">${renderVal(val, true)}</td>`;
                 });
                 rowHtml += `<td class="font-bold bg-ca1-light">${renderVal(gtTotalW1 !== null ? gtTotalW1 / 100 : null, true)}</td>`;
                 
                 w2Vals.forEach(val => {
-                    rowHtml += `<td>${renderVal(val, true)}</td>`;
+                    rowHtml += `<td class="bg-ca2-light">${renderVal(val, true)}</td>`;
                 });
                 rowHtml += `<td class="font-bold bg-ca2-light">${renderVal(gtTotalW2 !== null ? gtTotalW2 / 100 : null, true)}</td>`;
                 
