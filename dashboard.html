@@ -823,6 +823,7 @@
             document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
 
             globalData.activeTab = tabId;
+            updateDateDropdown();
 
             if (tabId === 'home') {
                 document.getElementById('view-home').classList.add('active');
@@ -1041,17 +1042,29 @@
                                 }
                             });
 
-                            let dates = Object.keys(dataByDate).sort().reverse(); 
+                            let validDates = [];
                             for (let date in dataByDate) {
                                 let d = dataByDate[date];
                                 let ams = Object.values(d.amMap).filter(a => normStr(a.name) !== "grand total" && a.total && a.total.vol !== undefined);
-                                ams.sort((a, b) => {
-                                    let gtcA = a.total ? a.total.gtc : 0;
-                                    let gtcB = b.total ? b.total.gtc : 0;
-                                    return gtcA - gtcB;
-                                });
-                                d.ams = ams;
+                                
+                                let hasData = false;
+                                if (d.grandTotal && d.grandTotal.total && d.grandTotal.total.vol > 0) hasData = true;
+                                ams.forEach(a => { if (a.total && a.total.vol > 0) hasData = true; });
+                                
+                                if (!hasData) {
+                                    delete dataByDate[date];
+                                } else {
+                                    ams.sort((a, b) => {
+                                        let gtcA = a.total ? a.total.gtc : 0;
+                                        let gtcB = b.total ? b.total.gtc : 0;
+                                        return gtcA - gtcB;
+                                    });
+                                    d.ams = ams;
+                                    validDates.push(date);
+                                }
                             }
+                            
+                            let dates = validDates.sort().reverse(); 
                             
                             resolve({ dates, dataByDate, rawCount: rawRows.length });
                         } catch (e) {
@@ -1073,7 +1086,8 @@
                     fetchAndParseBCP(BCP_URL, 'bcp-tong'),
                     fetchAndParseBCP(BCP_TTS_URL, 'bcp-tts')
                 ]);
-                populateDates();
+                switchTab(globalData.activeTab);
+                renderHomeAnalytics();
             } catch(e) {
                 console.error(e);
                 alert("Lỗi khi tải dữ liệu: " + e.message);
@@ -1138,28 +1152,43 @@
             } catch(e) { console.error("LTC TTS failed", e); }
         }
 
-        function populateDates() {
-            let allDates = new Set([
-                ...(globalData.gtc.dates || []), 
-                ...(globalData.tts.dates || []),
-                ...(globalData['ltc-tong'].dates || []),
-                ...(globalData['ltc-tts'].dates || [])
-            ]);
-            let sortedDates = Array.from(allDates).sort().reverse();
+        function updateDateDropdown() {
+            let tabId = globalData.activeTab;
+            let validDates = [];
             
+            if (tabId === 'gtc') {
+                validDates = [...(globalData.gtc.dates || []), ...(globalData.tts.dates || [])];
+            } else if (tabId === 'ltc') {
+                validDates = [...(globalData['ltc-tong'].dates || []), ...(globalData['ltc-tts'].dates || [])];
+            } else if (tabId === 'bcp-tong') {
+                validDates = globalData['bcp-tong'].dates || [];
+            } else if (tabId === 'bcp-tts') {
+                validDates = globalData['bcp-tts'].dates || [];
+            } else {
+                // Home, Org tab uses all dates for global analytics
+                validDates = [...(globalData.gtc.dates || [])];
+            }
+            
+            let sortedDates = Array.from(new Set(validDates)).sort().reverse();
             let dateSelect = document.getElementById('date-filter');
+            
+            let currentVal = dateSelect.value || globalData.activeDate;
             dateSelect.innerHTML = '<option value="">-- Chọn ngày báo cáo --</option>';
+            
             sortedDates.forEach(d => {
                 dateSelect.innerHTML += `<option value="${d}">${d}</option>`;
             });
             
-            if (sortedDates.length > 0 && !globalData.activeDate) {
+            if (currentVal && sortedDates.includes(currentVal)) {
+                globalData.activeDate = currentVal;
+                dateSelect.value = currentVal;
+            } else if (sortedDates.length > 0) {
                 globalData.activeDate = sortedDates[0];
                 dateSelect.value = sortedDates[0];
+            } else {
+                globalData.activeDate = "";
+                dateSelect.value = "";
             }
-            
-            switchTab(globalData.activeTab);
-            renderHomeAnalytics();
         }
 
         function handleDateChange(dateVal) {
@@ -1250,8 +1279,21 @@
                     }
                 }
                 
+                let validDates = [];
+                for (let date in bcpData) {
+                    let hasData = false;
+                    Object.values(bcpData[date]).forEach(bc => {
+                        if (bc.tong && bc.tong.vol > 0) hasData = true;
+                    });
+                    if (!hasData) {
+                        delete bcpData[date];
+                    } else {
+                        validDates.push(date);
+                    }
+                }
+                
                 globalData[globalKey].dataByDate = bcpData;
-                globalData[globalKey].dates = Object.keys(bcpData).sort((a,b) => b.localeCompare(a));
+                globalData[globalKey].dates = validDates.sort((a,b) => b.localeCompare(a));
                 globalData[globalKey].loaded = true;
                 
             } catch(e) {
