@@ -449,7 +449,8 @@
             <ul class="nav-links">
                 <li id="nav-home" class="active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i> <span style="white-space: nowrap;">Trang Chủ</span></li>
                 <li id="nav-gtc" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> <span style="white-space: nowrap;">Tỷ Lệ Giao Thành Công</span></li>
-                <li id="nav-bcp" onclick="switchTab('bcp')"><i class="fa-solid fa-building"></i> <span style="white-space: nowrap;">GTC Theo Bưu Cục</span></li>
+                <li id="nav-bcp-tong" onclick="switchTab('bcp-tong')"><i class="fa-solid fa-building"></i> <span style="white-space: nowrap;">GTC Tổng Theo Bưu Cục</span></li>
+                <li id="nav-bcp-tts" onclick="switchTab('bcp-tts')"><i class="fa-brands fa-tiktok"></i> <span style="white-space: nowrap;">GTC TTS Theo Bưu Cục</span></li>
                 <li id="nav-ltc" onclick="switchTab('ltc')"><i class="fa-solid fa-truck-fast"></i> <span style="white-space: nowrap;">Tỷ Lệ Lấy Thành Công</span></li>
                 <li id="nav-org" onclick="switchTab('org')" style="display: none;"><i class="fa-solid fa-sitemap"></i> <span style="white-space: nowrap;">Cơ Cấu Tổ Chức</span></li>
             </ul>
@@ -671,18 +672,18 @@
             </div>
         </div>
 
-        <!-- ================= BCP VIEW (GTC THEO BƯU CỤC) ================= -->
-        <div id="view-bcp" class="view-container">
+        <!-- ================= BCP TỔNG VIEW ================= -->
+        <div id="view-bcp-tong" class="view-container">
             <div style="background-color: var(--white); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); text-align: center; margin-bottom: 2rem;">
                 <div class="gtc-title-row">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fa-solid fa-building" style="color: var(--ghn-orange)"></i> <span id="bcp-table-title">BÁO CÁO GTC THEO BƯU CỤC - NGÀY ...</span>
+                        <i class="fa-solid fa-building" style="color: var(--ghn-orange)"></i> <span id="bcp-tong-table-title">BÁO CÁO GTC TỔNG THEO BƯU CỤC - NGÀY ...</span>
                     </div>
                     <button class="btn-blue"><i class="fa-brands fa-telegram"></i> Gửi Telegram</button>
                 </div>
                 
                 <div style="overflow-x: auto; max-height: 800px; overflow-y: auto; position: relative;">
-                    <table class="gtc-table" id="bcp-table" style="min-width: 1200px; font-size: 0.8rem; white-space: nowrap;">
+                    <table class="gtc-table" id="bcp-tong-table" style="min-width: 1200px; font-size: 0.8rem; white-space: nowrap;">
                         <thead style="position: sticky; top: 0; z-index: 10;">
                             <tr>
                                 <th rowspan="2" class="bg-header-main" style="width: 40px; position: sticky; left: 0; z-index: 11; font-size: 0.75rem;">STT</th>
@@ -700,7 +701,44 @@
                                 <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong">% GTC</th><th class="sub-tong">Leadtime</th>
                             </tr>
                         </thead>
-                        <tbody id="bcp-tbody">
+                        <tbody id="bcp-tong-tbody">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BCP TTS VIEW ================= -->
+        <div id="view-bcp-tts" class="view-container">
+            <div style="background-color: var(--white); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); text-align: center; margin-bottom: 2rem;">
+                <div class="gtc-title-row">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-brands fa-tiktok" style="color: var(--ghn-orange)"></i> <span id="bcp-tts-table-title">BÁO CÁO GTC TIKTOK THEO BƯU CỤC - NGÀY ...</span>
+                    </div>
+                    <button class="btn-blue"><i class="fa-brands fa-telegram"></i> Gửi Telegram</button>
+                </div>
+                
+                <div style="overflow-x: auto; max-height: 800px; overflow-y: auto; position: relative;">
+                    <table class="gtc-table" id="bcp-tts-table" style="min-width: 1200px; font-size: 0.8rem; white-space: nowrap;">
+                        <thead style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th rowspan="2" class="bg-header-main" style="width: 40px; position: sticky; left: 0; z-index: 11; font-size: 0.75rem;">STT</th>
+                                <th rowspan="2" class="bg-header-main" style="width: 120px; position: sticky; left: 40px; z-index: 11; font-size: 0.75rem;">AM</th>
+                                <th rowspan="2" class="bg-header-main" style="width: 220px; position: sticky; left: 160px; z-index: 11; font-size: 0.75rem;">Bưu Cục</th>
+                                <th colspan="3" class="bg-ca1" style="background-color: #fef08a !important; color: #854d0e !important; border-top: 3px solid #eab308 !important;">Hàng Mới Ca 1</th>
+                                <th colspan="3" class="bg-ca2" style="background-color: #bbf7d0 !important; color: #166534 !important; border-top: 3px solid #22c55e !important;">Hàng Mới Ca 2</th>
+                                <th colspan="3" class="bg-ton" style="background-color: #e0f2fe !important; color: #0284c7 !important; border-top: 3px solid #0ea5e9 !important;">Hàng Tồn</th>
+                                <th colspan="4" class="bg-tong" style="background-color: #cffafe !important; color: #0891b2 !important; border-top: 3px solid #06b6d4 !important;">TỔNG NGÀY</th>
+                            </tr>
+                            <tr>
+                                <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                                <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                                <th class="sub-header">Volume</th><th class="sub-header">% Gán</th><th class="sub-header">% GTC</th>
+                                <th class="sub-tong">Volume</th><th class="sub-tong">% Gán</th><th class="sub-tong">% GTC</th><th class="sub-tong">Leadtime</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bcp-tts-tbody">
                             <!-- Rendered by JS -->
                         </tbody>
                     </table>
@@ -759,13 +797,15 @@
         const COMPARE_GTC_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1857120021";
         const LTC_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1262656134";
         const BCP_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1564327976";
+        const BCP_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1436857755";
 
         let globalData = {
             gtc: { dates: [], dataByDate: {}, loaded: false },
             tts: { dates: [], dataByDate: {}, loaded: false },
             'ltc-tong': { dates: [], dataByDate: {}, loaded: false },
             'ltc-tts': { dates: [], dataByDate: {}, loaded: false },
-            bcp: { dates: [], dataByDate: {}, loaded: false },
+            'bcp-tong': { dates: [], dataByDate: {}, loaded: false },
+            'bcp-tts': { dates: [], dataByDate: {}, loaded: false },
             org: { loaded: false, dataMap: {}, ams: [], provinces: [] },
             activeDate: "",
             activeTab: "home"
@@ -794,12 +834,18 @@
                 document.getElementById('banner-title').innerText = "Sơ Đồ Tổ Chức Mạng Lưới - Trung Trung Bộ";
                 document.getElementById('date-display').innerText = "Dữ liệu cơ cấu nhân sự hiện tại";
                 document.getElementById('date-filter').style.display = 'none';
-            } else if (tabId === 'bcp') {
-                document.getElementById('view-bcp').classList.add('active');
-                document.getElementById('banner-title').innerText = "Báo Cáo GTC Theo Bưu Cục";
+            } else if (tabId === 'bcp-tong') {
+                document.getElementById('view-bcp-tong').classList.add('active');
+                document.getElementById('banner-title').innerText = "Báo Cáo GTC Tổng Theo Bưu Cục";
                 document.getElementById('date-display').innerText = "Dữ liệu thực tế ngày: " + (globalData.activeDate || "...");
                 document.getElementById('date-filter').style.display = 'inline-block';
-                renderBCPTable();
+                renderBCPView('bcp-tong', 'bcp-tong-tbody', 'bcp-tong-table-title', 'BÁO CÁO GTC TỔNG THEO BƯU CỤC');
+            } else if (tabId === 'bcp-tts') {
+                document.getElementById('view-bcp-tts').classList.add('active');
+                document.getElementById('banner-title').innerText = "Báo Cáo GTC TTS Theo Bưu Cục";
+                document.getElementById('date-display').innerText = "Dữ liệu thực tế ngày: " + (globalData.activeDate || "...");
+                document.getElementById('date-filter').style.display = 'inline-block';
+                renderBCPView('bcp-tts', 'bcp-tts-tbody', 'bcp-tts-table-title', 'BÁO CÁO GTC TIKTOK THEO BƯU CỤC');
             } else if (tabId === 'gtc' || tabId === 'ltc') {
                 document.getElementById('view-gtc').classList.add('active'); 
                 document.getElementById('date-filter').style.display = 'inline-block';
@@ -1024,7 +1070,8 @@
                     loadGTCData(),
                     loadLTCData(),
                     loadOrgData(),
-                    loadBCPData()
+                    fetchAndParseBCP(BCP_URL, 'bcp-tong'),
+                    fetchAndParseBCP(BCP_TTS_URL, 'bcp-tts')
                 ]);
                 populateDates();
             } catch(e) {
@@ -1120,14 +1167,16 @@
             globalData.activeDate = dateVal;
             if (['gtc', 'ltc'].includes(globalData.activeTab)) {
                 renderCurrentGTCData();
-            } else if (globalData.activeTab === 'bcp') {
-                renderBCPTable();
+            } else if (globalData.activeTab === 'bcp-tong') {
+                renderBCPView('bcp-tong', 'bcp-tong-tbody', 'bcp-tong-table-title', 'BÁO CÁO GTC TỔNG THEO BƯU CỤC');
+            } else if (globalData.activeTab === 'bcp-tts') {
+                renderBCPView('bcp-tts', 'bcp-tts-tbody', 'bcp-tts-table-title', 'BÁO CÁO GTC TIKTOK THEO BƯU CỤC');
             }
         }
 
-        async function loadBCPData() {
+        async function fetchAndParseBCP(url, globalKey) {
             try {
-                let res = await fetch(BCP_URL);
+                let res = await fetch(url);
                 let text = await res.text();
                 let parsed = Papa.parse(text, { header: false, skipEmptyLines: true });
                 let rows = parsed.data;
@@ -1201,28 +1250,28 @@
                     }
                 }
                 
-                globalData.bcp.dataByDate = bcpData;
-                globalData.bcp.dates = Object.keys(bcpData).sort((a,b) => b.localeCompare(a));
-                globalData.bcp.loaded = true;
+                globalData[globalKey].dataByDate = bcpData;
+                globalData[globalKey].dates = Object.keys(bcpData).sort((a,b) => b.localeCompare(a));
+                globalData[globalKey].loaded = true;
                 
             } catch(e) {
-                console.error("BCP Load Error", e);
+                console.error("BCP Load Error for " + globalKey, e);
             }
         }
 
-        function renderBCPTable() {
-            let tbody = document.getElementById('bcp-tbody');
+        function renderBCPView(globalKey, tbodyId, titleId, titlePrefix) {
+            let tbody = document.getElementById(tbodyId);
             if(!tbody) return;
             
             let dateStr = globalData.activeDate;
-            document.getElementById('bcp-table-title').innerText = `BÁO CÁO GTC THEO BƯU CỤC - NGÀY ${dateStr.split(' - ')[0] || '...'}`;
+            document.getElementById(titleId).innerText = `${titlePrefix} - NGÀY ${dateStr.split(' - ')[0] || '...'}`;
             
-            if (!dateStr || !globalData.bcp.dataByDate[dateStr]) {
+            if (!dateStr || !globalData[globalKey].dataByDate[dateStr]) {
                 tbody.innerHTML = `<tr><td colspan="16" style="text-align:center; padding: 2rem;">Không có dữ liệu cho ngày này.</td></tr>`;
                 return;
             }
 
-            let dayData = globalData.bcp.dataByDate[dateStr];
+            let dayData = globalData[globalKey].dataByDate[dateStr];
             let bcs = Object.values(dayData);
             
             // Separate Grand Total
@@ -1269,7 +1318,7 @@
                 html += `
                     <tr>
                         <td style="position: sticky; left: 0; z-index: 5; ${bgClass}">${sttDisplay}</td>
-                        <td style="position: sticky; left: 40px; z-index: 5; ${bgClass}">${bc.am || ''}</td>
+                        <td style="text-align: left; position: sticky; left: 40px; z-index: 5; ${bgClass}">${bc.am || ''}</td>
                         <td style="text-align: left; position: sticky; left: 160px; z-index: 5; font-weight: 500; ${bgClass}">${bc.bc || ''}</td>
                         ${renderBlock(bc.ca1)}
                         ${renderBlock(bc.ca2)}
