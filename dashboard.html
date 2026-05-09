@@ -451,6 +451,7 @@
                 <li id="nav-gtc" onclick="switchTab('gtc')"><i class="fa-solid fa-chart-line"></i> <span style="white-space: nowrap;">Tỷ Lệ Giao Thành Công</span></li>
                 <li id="nav-bcp-tong" onclick="switchTab('bcp-tong')"><i class="fa-solid fa-building"></i> <span style="white-space: nowrap;">GTC Tổng Theo Bưu Cục</span></li>
                 <li id="nav-bcp-tts" onclick="switchTab('bcp-tts')"><i class="fa-brands fa-tiktok"></i> <span style="white-space: nowrap;">GTC TTS Theo Bưu Cục</span></li>
+                <li id="nav-odr-tts" onclick="switchTab('odr-tts')"><i class="fa-solid fa-stopwatch"></i> <span style="white-space: nowrap;">ODR TTS</span></li>
                 <li id="nav-ltc" onclick="switchTab('ltc')"><i class="fa-solid fa-truck-fast"></i> <span style="white-space: nowrap;">Tỷ Lệ Lấy Thành Công</span></li>
                 <li id="nav-org" onclick="switchTab('org')" style="display: none;"><i class="fa-solid fa-sitemap"></i> <span style="white-space: nowrap;">Cơ Cấu Tổ Chức</span></li>
             </ul>
@@ -746,6 +747,45 @@
             </div>
         </div>
 
+        <!-- ================= ODR TTS VIEW ================= -->
+        <div id="view-odr-tts" class="view-container">
+            <div style="background-color: var(--white); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); text-align: center; margin-bottom: 2rem;">
+                <div class="gtc-title-row">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-stopwatch" style="color: var(--ghn-orange)"></i> <span style="font-weight: bold; font-size: 1.1rem; text-transform: uppercase;">BÁO CÁO ODR TTS TỈNH</span>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto; position: relative; margin-bottom: 2rem;">
+                    <table class="gtc-table" id="odr-tinh-table" style="min-width: 1000px; font-size: 0.85rem; white-space: nowrap;">
+                        <thead id="odr-tinh-thead" style="position: sticky; top: 0; z-index: 10;">
+                            <!-- Rendered dynamically -->
+                        </thead>
+                        <tbody id="odr-tinh-tbody">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="gtc-title-row" style="margin-top: 3rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-building" style="color: var(--ghn-orange)"></i> <span style="font-weight: bold; font-size: 1.1rem; text-transform: uppercase;">BÁO CÁO ODR TTS BƯU CỤC</span>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto; max-height: 600px; overflow-y: auto; position: relative;">
+                    <table class="gtc-table" id="odr-bc-table" style="min-width: 1200px; font-size: 0.85rem; white-space: nowrap;">
+                        <thead id="odr-bc-thead" style="position: sticky; top: 0; z-index: 10;">
+                            <!-- Rendered dynamically -->
+                        </thead>
+                        <tbody id="odr-bc-tbody">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- ================= ORG VIEW ================= -->
         <div id="view-org" class="view-container">
             <div class="org-container">
@@ -798,6 +838,7 @@
         const LTC_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1262656134";
         const BCP_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1564327976";
         const BCP_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1436857755";
+        const ODR_TTS_URL = "https://docs.google.com/spreadsheets/d/1pgU9FV0XZk_1RhPZeeLrHb5qqbELNLvHEv4DvcXg_8c/export?format=csv&gid=1219675742";
 
         let globalData = {
             gtc: { dates: [], dataByDate: {}, loaded: false },
@@ -806,6 +847,7 @@
             'ltc-tts': { dates: [], dataByDate: {}, loaded: false },
             'bcp-tong': { dates: [], dataByDate: {}, loaded: false },
             'bcp-tts': { dates: [], dataByDate: {}, loaded: false },
+            'odr-tts': { dates: [], dataByDate: {}, loaded: false },
             org: { loaded: false, dataMap: {}, ams: [], provinces: [] },
             activeDate: "",
             activeTab: "home"
@@ -847,6 +889,12 @@
                 document.getElementById('date-display').innerText = "Dữ liệu thực tế ngày: " + (globalData.activeDate || "...");
                 document.getElementById('date-filter').style.display = 'inline-block';
                 renderBCPView('bcp-tts', 'bcp-tts-tbody', 'bcp-tts-table-title', 'BÁO CÁO GTC TIKTOK THEO BƯU CỤC');
+            } else if (tabId === 'odr-tts') {
+                document.getElementById('view-odr-tts').classList.add('active');
+                document.getElementById('banner-title').innerText = "Báo Cáo ODR TTS";
+                document.getElementById('date-display').innerText = "Dữ liệu thực tế ngày: " + (globalData.activeDate || "...");
+                document.getElementById('date-filter').style.display = 'inline-block';
+                renderODRTable();
             } else if (tabId === 'gtc' || tabId === 'ltc') {
                 document.getElementById('view-gtc').classList.add('active'); 
                 document.getElementById('date-filter').style.display = 'inline-block';
@@ -1084,7 +1132,8 @@
                     loadLTCData(),
                     loadOrgData(),
                     fetchAndParseBCP(BCP_URL, 'bcp-tong'),
-                    fetchAndParseBCP(BCP_TTS_URL, 'bcp-tts')
+                    fetchAndParseBCP(BCP_TTS_URL, 'bcp-tts'),
+                    fetchAndParseODR(ODR_TTS_URL)
                 ]);
                 switchTab(globalData.activeTab);
                 renderHomeAnalytics();
@@ -1164,6 +1213,8 @@
                 validDates = globalData['bcp-tong'].dates || [];
             } else if (tabId === 'bcp-tts') {
                 validDates = globalData['bcp-tts'].dates || [];
+            } else if (tabId === 'odr-tts') {
+                validDates = globalData['odr-tts'].dates || [];
             } else {
                 // Home, Org tab uses all dates for global analytics
                 validDates = [...(globalData.gtc.dates || [])];
@@ -1200,6 +1251,8 @@
                 renderBCPView('bcp-tong', 'bcp-tong-tbody', 'bcp-tong-table-title', 'BÁO CÁO GTC TỔNG THEO BƯU CỤC');
             } else if (globalData.activeTab === 'bcp-tts') {
                 renderBCPView('bcp-tts', 'bcp-tts-tbody', 'bcp-tts-table-title', 'BÁO CÁO GTC TIKTOK THEO BƯU CỤC');
+            } else if (globalData.activeTab === 'odr-tts') {
+                renderODRTable();
             }
         }
 
@@ -1298,6 +1351,81 @@
                 
             } catch(e) {
                 console.error("BCP Load Error for " + globalKey, e);
+            }
+        }
+
+        async function fetchAndParseODR(url) {
+            try {
+                let res = await fetch(url);
+                let text = await res.text();
+                let parsed = Papa.parse(text, { header: false, skipEmptyLines: true });
+                let rows = parsed.data;
+                
+                let odrData = {}; // { date: { tinhMap: {}, bcMap: {}, total: null } }
+                
+                let parsePerc = (s) => {
+                    if (!s || s.trim() === '') return null;
+                    let p = parseFloat(s.replace('%', '').replace(',', '.'));
+                    if (isNaN(p)) return null;
+                    if (s.indexOf('%') === -1 && p <= 1.0) {
+                        return p * 100;
+                    }
+                    return p;
+                };
+
+                for(let i = 1; i < rows.length; i++) {
+                    let r = rows[i];
+                    // Tỉnh (0-4)
+                    if (r.length >= 5 && r[1] && r[1].trim() !== '') {
+                        let tinh = r[1].trim();
+                        let date = r[2] ? r[2].trim() : '';
+                        let ontime = parsePerc(r[4]);
+                        
+                        if (date && date !== 'Time') {
+                            if (!odrData[date]) odrData[date] = { tinhMap: {}, bcMap: {}, total: null };
+                            odrData[date].tinhMap[tinh] = ontime;
+                        }
+                    }
+                    // Bưu cục (6-10)
+                    if (r.length >= 11 && r[7] && r[7].trim() !== '') {
+                        let bc = r[7].trim();
+                        let date = r[8] ? r[8].trim() : '';
+                        let ontime = parsePerc(r[10]);
+                        
+                        if (date && date !== 'Time') {
+                            if (!odrData[date]) odrData[date] = { tinhMap: {}, bcMap: {}, total: null };
+                            odrData[date].bcMap[bc] = ontime;
+                        }
+                    }
+                    // Total TTB (12-15)
+                    if (r.length >= 16 && r[12] && r[12].trim() !== '') {
+                        let date = r[13] ? r[13].trim() : '';
+                        let ontime = parsePerc(r[15]);
+                        
+                        if (date && date !== 'Time') {
+                            if (!odrData[date]) odrData[date] = { tinhMap: {}, bcMap: {}, total: null };
+                            odrData[date].total = ontime;
+                        }
+                    }
+                }
+                
+                let validDates = [];
+                for (let date in odrData) {
+                    let hasData = false;
+                    if (odrData[date].total !== null) hasData = true;
+                    if (Object.keys(odrData[date].tinhMap).length > 0) hasData = true;
+                    if (!hasData) {
+                        delete odrData[date];
+                    } else {
+                        validDates.push(date);
+                    }
+                }
+                
+                globalData['odr-tts'].dataByDate = odrData;
+                globalData['odr-tts'].dates = validDates.sort((a,b) => b.localeCompare(a));
+                globalData['odr-tts'].loaded = true;
+            } catch(e) {
+                console.error("ODR TTS Load Error", e);
             }
         }
 
@@ -2009,6 +2137,210 @@
             if(matchCount === 0) {
                 grid.innerHTML = `<div style="grid-column: 1/-1; padding: 3rem; text-align: center; color: var(--text-gray); font-size: 1.1rem; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">Không tìm thấy bưu cục nào phù hợp!</div>`;
             }
+        }
+
+        async function fetchAndParseODR(url) {
+            try {
+                let res = await fetch(url);
+                let text = await res.text();
+                let parsed = Papa.parse(text, { header: false, skipEmptyLines: true });
+                let rows = parsed.data;
+                
+                let odrData = {}; // { date: { tinhMap: {}, bcMap: {}, total: null } }
+                
+                let parsePerc = (s) => {
+                    if (!s || s.trim() === '') return null;
+                    let p = parseFloat(s.replace('%', '').replace(',', '.'));
+                    if (isNaN(p)) return null;
+                    if (s.indexOf('%') === -1 && p <= 1.0) {
+                        return p * 100;
+                    }
+                    return p;
+                };
+
+                for(let i = 1; i < rows.length; i++) {
+                    let r = rows[i];
+                    // Tỉnh (0-4)
+                    if (r.length >= 5 && r[1] && r[1].trim() !== '') {
+                        let tinh = r[1].trim();
+                        let date = r[2] ? r[2].trim() : '';
+                        let ontime = parsePerc(r[4]);
+                        
+                        if (date && date !== 'Time') {
+                            if (!odrData[date]) odrData[date] = { tinhMap: {}, bcMap: {}, total: null };
+                            odrData[date].tinhMap[tinh] = ontime;
+                        }
+                    }
+                    // Bưu cục (6-10)
+                    if (r.length >= 11 && r[7] && r[7].trim() !== '') {
+                        let bc = r[7].trim();
+                        let date = r[8] ? r[8].trim() : '';
+                        let ontime = parsePerc(r[10]);
+                        
+                        if (date && date !== 'Time') {
+                            if (!odrData[date]) odrData[date] = { tinhMap: {}, bcMap: {}, total: null };
+                            odrData[date].bcMap[bc] = ontime;
+                        }
+                    }
+                    // Total TTB (12-15)
+                    if (r.length >= 16 && r[12] && r[12].trim() !== '') {
+                        let date = r[13] ? r[13].trim() : '';
+                        let ontime = parsePerc(r[15]);
+                        
+                        if (date && date !== 'Time') {
+                            if (!odrData[date]) odrData[date] = { tinhMap: {}, bcMap: {}, total: null };
+                            odrData[date].total = ontime;
+                        }
+                    }
+                }
+                
+                let validDates = [];
+                for (let date in odrData) {
+                    let hasData = false;
+                    if (odrData[date].total !== null) hasData = true;
+                    if (Object.keys(odrData[date].tinhMap).length > 0) hasData = true;
+                    if (!hasData) {
+                        delete odrData[date];
+                    } else {
+                        validDates.push(date);
+                    }
+                }
+                
+                globalData['odr-tts'].dataByDate = odrData;
+                globalData['odr-tts'].dates = validDates.sort((a,b) => b.localeCompare(a));
+                globalData['odr-tts'].loaded = true;
+            } catch(e) {
+                console.error("ODR TTS Load Error", e);
+            }
+        }
+
+        function renderODRTable() {
+            let activeDate = globalData.activeDate;
+            let datesArr = globalData['odr-tts'].dates; // sorted descending
+            
+            if (!activeDate || !datesArr.includes(activeDate)) {
+                document.getElementById('odr-tinh-tbody').innerHTML = `<tr><td style="text-align:center; padding: 2rem;">Không có dữ liệu cho ngày này.</td></tr>`;
+                document.getElementById('odr-bc-tbody').innerHTML = `<tr><td style="text-align:center; padding: 2rem;">Không có dữ liệu cho ngày này.</td></tr>`;
+                return;
+            }
+            
+            let idx = datesArr.indexOf(activeDate);
+            // Get up to 8 dates (idx to idx + 7), then reverse to show oldest -> newest (left to right)
+            let selectedDates = datesArr.slice(idx, idx + 8).reverse();
+            
+            let theadHtml = `
+                <tr>
+                    <th rowspan="2" class="bg-header-main" style="width: 250px; position: sticky; left: 0; z-index: 11;">Chi tiết</th>
+                    <th colspan="${Math.max(1, selectedDates.length - 1)}" style="background-color: #93c5fd !important; color: #1e3a8a !important; border-top: 3px solid #3b82f6 !important; font-size: 1rem;">Tuần trước</th>
+                    <th rowspan="2" style="background-color: #86efac !important; color: #14532d !important; border-top: 3px solid #22c55e !important; width: 150px;">Ngày báo cáo<br>(N)</th>
+                    <th colspan="2" style="background-color: #2dd4bf !important; color: #134e4a !important; border-top: 3px solid #14b8a6 !important;">So sánh</th>
+                </tr>
+                <tr>
+            `;
+            
+            for (let i = 0; i < selectedDates.length - 1; i++) {
+                theadHtml += `<th class="bg-header-sub" style="font-size: 0.8rem; background-color: #bfdbfe !important;">${selectedDates[i]}</th>`;
+            }
+            if (selectedDates.length === 1) {
+                theadHtml += `<th class="bg-header-sub" style="font-size: 0.8rem; background-color: #bfdbfe !important;">-</th>`;
+            }
+            
+            theadHtml += `
+                    <th class="bg-header-sub" style="width: 80px; background-color: #99f6e4 !important;">W-1</th>
+                    <th class="bg-header-sub" style="width: 80px; background-color: #99f6e4 !important;">N-1</th>
+                </tr>
+            `;
+            
+            document.getElementById('odr-tinh-thead').innerHTML = theadHtml;
+            document.getElementById('odr-bc-thead').innerHTML = theadHtml;
+            
+            // Gather all distinct Tỉnh and Bưu Cục from the selected dates
+            let allTinh = new Set();
+            let allBc = new Set();
+            
+            selectedDates.forEach(d => {
+                let dData = globalData['odr-tts'].dataByDate[d];
+                if (dData) {
+                    Object.keys(dData.tinhMap).forEach(t => allTinh.add(t));
+                    Object.keys(dData.bcMap).forEach(b => allBc.add(b));
+                }
+            });
+            
+            let arrTinh = Array.from(allTinh).sort();
+            let arrBc = Array.from(allBc);
+            
+            // Sort BC by Day N ascending
+            let dayN = selectedDates[selectedDates.length - 1];
+            arrBc.sort((a, b) => {
+                let valA = globalData['odr-tts'].dataByDate[dayN]?.bcMap[a];
+                let valB = globalData['odr-tts'].dataByDate[dayN]?.bcMap[b];
+                let numA = valA !== undefined && valA !== null ? valA : 999;
+                let numB = valB !== undefined && valB !== null ? valB : 999;
+                if (numA !== numB) return numA - numB;
+                return a.localeCompare(b);
+            });
+            
+            function buildRowHtml(name, mapType, isTotalRow = false) {
+                let bgClass = isTotalRow ? "background-color: #fef3c7; font-weight: bold; color: #d97706;" : "background-color: #fff;";
+                let html = `<tr><td style="text-align: left; position: sticky; left: 0; z-index: 5; font-weight: bold; ${bgClass}">${name}</td>`;
+                
+                let w1Val = null, n1Val = null, nVal = null;
+                
+                for (let i = 0; i < selectedDates.length - 1; i++) {
+                    let dData = globalData['odr-tts'].dataByDate[selectedDates[i]];
+                    let val = null;
+                    if (dData) {
+                        val = isTotalRow ? dData.total : dData[mapType][name];
+                    }
+                    if (i === 0) w1Val = val; // Day N-7
+                    if (i === selectedDates.length - 2) n1Val = val; // Day N-1
+                    
+                    let isRed = (val !== null && val < 90);
+                    let displayVal = val !== null && val !== undefined ? val.toFixed(2) + '%' : '-';
+                    let tdStyle = isRed ? "color: #dc2626;" : "";
+                    html += `<td style="${tdStyle}">${displayVal}</td>`;
+                }
+                if (selectedDates.length === 1) {
+                    html += `<td>-</td>`;
+                }
+                
+                // Day N
+                let dDataN = globalData['odr-tts'].dataByDate[dayN];
+                if (dDataN) {
+                    nVal = isTotalRow ? dDataN.total : dDataN[mapType][name];
+                }
+                
+                let isRedN = (nVal !== null && nVal < 90);
+                let nDisplay = nVal !== null && nVal !== undefined ? nVal.toFixed(2) + '%' : '-';
+                let tdStyleN = isRedN ? "font-weight:bold; color: #dc2626; background-color: #fee2e2;" : "font-weight:bold;";
+                if (isTotalRow) tdStyleN = "font-weight:bold; background-color: #fef3c7; color: #d97706;";
+                
+                html += `<td style="${tdStyleN}">${nDisplay}</td>`;
+                
+                // Comparisons
+                let renderComp = (valBase) => {
+                    if (nVal === null || valBase === null || valBase === undefined) return `<td>-</td>`;
+                    let diff = nVal - valBase;
+                    let color = diff > 0 ? "color: #16a34a;" : (diff < 0 ? "color: #dc2626;" : "color: #475569;");
+                    let sign = diff > 0 ? "+" : "";
+                    return `<td style="font-weight:bold; ${color}">${sign}${diff.toFixed(2)}%</td>`;
+                };
+                
+                html += renderComp(w1Val);
+                html += renderComp(n1Val);
+                
+                html += `</tr>`;
+                return html;
+            }
+            
+            let tinhHtml = "";
+            arrTinh.forEach(t => tinhHtml += buildRowHtml(t, 'tinhMap'));
+            tinhHtml += buildRowHtml("TTB", 'tinhMap', true);
+            document.getElementById('odr-tinh-tbody').innerHTML = tinhHtml;
+            
+            let bcHtml = "";
+            arrBc.forEach(b => bcHtml += buildRowHtml(b, 'bcMap'));
+            document.getElementById('odr-bc-tbody').innerHTML = bcHtml;
         }
 
         // --- Export GTC ---
