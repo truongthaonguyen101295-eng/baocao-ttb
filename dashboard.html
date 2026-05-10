@@ -2295,7 +2295,7 @@
                     if (i === 0) w1Val = val; // Day N-7
                     if (i === selectedDates.length - 2) n1Val = val; // Day N-1
                     
-                    let isRed = (val !== null && val < 90);
+                    let isRed = (val !== null && val < 96);
                     let displayVal = val !== null && val !== undefined ? val.toFixed(2) + '%' : '-';
                     let tdStyle = isRed ? "color: #dc2626;" : "";
                     html += `<td style="${tdStyle}">${displayVal}</td>`;
@@ -2310,7 +2310,7 @@
                     nVal = isTotalRow ? dDataN.total : dDataN[mapType][name];
                 }
                 
-                let isRedN = (nVal !== null && nVal < 90);
+                let isRedN = (nVal !== null && nVal < 96);
                 let nDisplay = nVal !== null && nVal !== undefined ? nVal.toFixed(2) + '%' : '-';
                 let tdStyleN = isRedN ? "font-weight:bold; color: #dc2626; background-color: #fee2e2;" : "font-weight:bold;";
                 if (isTotalRow) tdStyleN = "font-weight:bold; background-color: #fef3c7; color: #d97706;";
